@@ -42,6 +42,7 @@ void key_map(INPUT& ip, int b)
     switch(b)
     {
     case 0:
+        //AFTER VK_HELP
         ip.ki.wVk = 0x41;break;
     case 1:
         ip.ki.wVk = 0x44;//d
