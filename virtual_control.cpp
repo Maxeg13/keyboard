@@ -64,7 +64,6 @@ void rule(float x, float y, INPUT& ip, int b)
         //LEFT
         if(x<x_centre-margin_x/2)
         {
-
             pressed[b]=1;
             state[b]=thresh((0.5-margin_x/2-x)/sens_div);
         }
@@ -122,17 +121,10 @@ void rule(float x, float y, INPUT& ip, int b)
 
 void control(float x, float y, INPUT& ip)
 {
-    float xh, yh;
-
-    // Release the "A" key
-    //control(gaze_point->position_xy[ 0 ],ip);
-    xh=x;
-    yh=y;
 
     for(int b=0;b<4;b++)
     {
-        //        pressed[b]=0;
-        rule(xh,yh,ip,b);
+        rule(x,y,ip,b);
     }
 
     if(write_on)
@@ -149,7 +141,7 @@ void control(float x, float y, INPUT& ip)
                     SendInput(1, &ip, sizeof(INPUT));
                 }
             }
-            Sleep(2);
+
             for(int b=0;b<4;b++)
             {
                 key_map(ip,b);
@@ -164,7 +156,7 @@ void control(float x, float y, INPUT& ip)
                     SendInput(1, &ip, sizeof(INPUT));
                 }
             }
-            Sleep(2);
+            Sleep(4);
         }
 
 

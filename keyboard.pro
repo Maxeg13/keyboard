@@ -33,7 +33,8 @@ LIBS+= $$OUT_PWD\release\tobii_stream_engine.dll
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    virtual_control.cpp
+    virtual_control.cpp \
+    arrows.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     include/tobii/tobii_streams.h \
     include/tobii/tobii_wearable.h \
     virtual_control.h \
-    mythread.h
+    mythread.h \
+    arrows.h
 
 FORMS +=
 
