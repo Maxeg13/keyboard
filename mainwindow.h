@@ -25,6 +25,7 @@ public slots:
 
     void closeEvent(QCloseEvent *);
     void writeChange();
+    void emulation();
 private:
 signals:
     void close_sgn();

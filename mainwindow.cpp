@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 //#include"virtual_control.h"
-#include <QLineEdit>
+#include <QTextEdit>
 #include "mythread.h"
+#include <QTimer>
 int cnt;
 float y_centre=.6;
 float x_centre=0.5;
@@ -9,8 +10,8 @@ bool write_on=1;
 
 
 MyThread* thread_main;
-QLineEdit* error_LE;
-
+QTextEdit* error_TE;
+QTimer* timer_emul;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
@@ -29,29 +30,32 @@ MainWindow::MainWindow(QWidget *parent) :
     sr_y_c->setRange(0,255);
     sr_y_c->setValue(60);
 
-    error_LE=new QLineEdit;
+    error_TE=new QTextEdit;
 
     GL->addWidget(sr_y_c,0,0,3,1);
     GL->addWidget(start_b,0,1);
     GL->addWidget(write_b,1,1);
-    GL->addWidget(error_LE,2,1,1,1);
-    error_LE->setMinimumHeight(200);
+    GL->addWidget(error_TE,2,1,1,1);
+    error_TE->setMinimumHeight(200);
     this->setMinimumWidth(350);
 //    core_func();
+    timer_emul=new QTimer;
+    timer_emul->setInterval(4);
+    timer_emul->start();
 
     setCentralWidget(centralWidget1);
     connect(start_b,SIGNAL(released()),this,SLOT(btn_released()));
     connect(sr_y_c,SIGNAL(valueChanged(int)),this,SLOT(refr()));
     connect(write_b,SIGNAL(released()),this,SLOT(writeChange()));
     connect(REC,SIGNAL(sig_out(vector<uint8_t>)),this,SLOT(getEMG(vector<uint8_t>)));
-
+//    connect(timer_emul,SIGNAL(timeout()),this,SLOT(emulation()));
 }
 
 void MainWindow::btn_released()
 {
     if(cnt==0)
     {
-        start_b->setText(QString("works"));
+        start_b->setText(QString("emulation works"));
         //    start_b->setEnabled(0);
         thread_main=new MyThread();
         thread_main->start();
@@ -82,6 +86,11 @@ void MainWindow::writeChange()
         write_b->setText(QString("write on"));
     else
         write_b->setText(QString("write off"));
+}
+
+void MainWindow::emulation()
+{
+//    control();
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
