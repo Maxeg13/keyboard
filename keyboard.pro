@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-
+QT += network widgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = keyboard
@@ -34,7 +34,8 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     virtual_control.cpp \
-    arrows.cpp
+    arrows.cpp \
+    udp.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,7 +45,9 @@ HEADERS += \
     include/tobii/tobii_wearable.h \
     virtual_control.h \
     mythread.h \
-    arrows.h
+    arrows.h \
+    control_rules.h \
+    udp.h
 
 FORMS +=
 

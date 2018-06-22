@@ -11,7 +11,7 @@ Arrows::Arrows(QWidget *parent) : QWidget(parent)
 {
     int width=100;
     int thick=width*0.4;
-    int height=150;
+    int height=190;
     pgn_o.push_back(QPoint(-width/2,-height/2));
     pgn_o.push_back(QPoint(-width/2+thick,-height/2));
     //    pgn_o.push_back(QPoint(0,-height/2));
@@ -20,7 +20,8 @@ Arrows::Arrows(QWidget *parent) : QWidget(parent)
     pgn_o.push_back(QPoint(-width/2,height/2));
     pgn_o.push_back(QPoint(width/2-thick,0));
 
-    float scr=1.5;
+    thick=width*0.4;
+    float scr=1.2;
     pgn_ov.push_back(QPoint(-height/2*scr,-width/2));
     pgn_ov.push_back(QPoint(-height/2*scr,-width/2+thick));
     //    pgn_o.push_back(QPoint(0,-height/2));

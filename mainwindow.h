@@ -5,11 +5,13 @@
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QSlider>
+#include "udp.h"
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    Receiver* REC;
     QPushButton* start_b;
     QPushButton* write_b;
     void keyPressEvent(QKeyEvent *event);
@@ -21,10 +23,11 @@ public slots:
     void btn_released();
     void refr();
 
-
+    void closeEvent(QCloseEvent *);
     void writeChange();
 private:
-
+signals:
+    void close_sgn();
 
 
 };

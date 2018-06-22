@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 //#include"virtual_control.h"
-
+#include <QLineEdit>
 #include "mythread.h"
 int cnt;
 float y_centre=.6;
@@ -9,10 +9,12 @@ bool write_on=1;
 
 
 MyThread* thread_main;
+QLineEdit* error_LE;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    REC=new Receiver();
     start_b=new QPushButton("capture keyboard");
     write_b=new QPushButton("write on");
 
@@ -27,16 +29,21 @@ MainWindow::MainWindow(QWidget *parent) :
     sr_y_c->setRange(0,255);
     sr_y_c->setValue(60);
 
+    error_LE=new QLineEdit;
 
     GL->addWidget(sr_y_c,0,0,3,1);
     GL->addWidget(start_b,0,1);
     GL->addWidget(write_b,1,1);
+    GL->addWidget(error_LE,2,1,1,1);
+    error_LE->setMinimumHeight(200);
+    this->setMinimumWidth(350);
 //    core_func();
 
     setCentralWidget(centralWidget1);
     connect(start_b,SIGNAL(released()),this,SLOT(btn_released()));
     connect(sr_y_c,SIGNAL(valueChanged(int)),this,SLOT(refr()));
     connect(write_b,SIGNAL(released()),this,SLOT(writeChange()));
+    connect(REC,SIGNAL(sig_out(vector<uint8_t>)),this,SLOT(getEMG(vector<uint8_t>)));
 
 }
 
@@ -75,6 +82,11 @@ void MainWindow::writeChange()
         write_b->setText(QString("write on"));
     else
         write_b->setText(QString("write off"));
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    emit close_sgn();
 }
 
 MainWindow::~MainWindow()

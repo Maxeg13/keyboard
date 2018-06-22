@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     ars.showFullScreen();
     w.show();
-
+    QObject::connect(&w,SIGNAL(close_sgn()),&a,SLOT(closeAllWindows()));
 
     return a.exec();
 }

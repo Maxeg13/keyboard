@@ -18,149 +18,8 @@
 #include <windows.h>
 #include <conio.h>
 std::thread* thread1;
-float margin_x=0.05;
-float margin_y=0.17;
-extern bool write_on;
-extern float y_centre;
-extern float x_centre;
-int state[4]={0,0,0,0};
-bool state_p[4]={0,0,0,0};
-bool pressed[4]={0,0,0,0};
-float sens_div=0.02;
-//int gl_cnt=0;
-int quantiz=16;
-
-int thresh(int x)
-{
-    if(x<quantiz)
-        return x;
-    else
-        return quantiz;
-}
-void key_map(INPUT& ip, int b)
-{
-    switch(b)
-    {
-    case 0:
-        //AFTER VK_HELP
-        ip.ki.wVk = 0x41;break;
-    case 1:
-        ip.ki.wVk = 0x44;//d
-        break;
-    case 2:
-        ip.ki.wVk = 0x57;
-        break;
-    case 3:
-        ip.ki.wVk = 0x53;
-    }
-}
-
-void rule(float x, float y, INPUT& ip, int b)
-{
-    key_map(ip,b);
-    switch(b)
-    {
-    case 0:
-        //LEFT
-        if(x<x_centre-margin_x/2)
-        {
-            pressed[b]=1;
-            state[b]=thresh((0.5-margin_x/2-x)/sens_div);
-        }
-        else
-        {
-            pressed[b]=0;
-            state[b]=0;
-        }
-        break;
-    case 1:
-        //RIGHT
-        if(x>x_centre+margin_x/2)
-        {
-            pressed[b]=1;
-            //            std::cout<<(state[b]=thresh(-(0.5+margin_x/2-x)/sens_div))<<std::endl;
-            state[b]=thresh(-(0.5+margin_x/2-x)/sens_div);
-            //            state[b]=1;
-
-        }
-        else
-        {
-            pressed[b]=0;
-            state[b]=0;
-        }
-        break;
-    case 2:
-        //FORWARD
-        if(y<y_centre)
-        {
-            pressed[b]=1;
-            state[b]=thresh((y_centre-y)/(sens_div/2));
-        }
-        else
-        {
-            pressed[b]=0;
-            state[b]=0;
-        }
-        break;
-    case 3:
-        //BACK
-        if(y>y_centre+margin_y/2)
-        {
-
-            pressed[b]=1;
-            state[b]=quantiz;
-        }
-        else
-        {
-            pressed[b]=0;
-            state[b]=0;
-        }
-    }
-}
-
-
-void control(float x, float y, INPUT& ip)
-{
-
-    for(int b=0;b<4;b++)
-    {
-        rule(x,y,ip,b);
-    }
-
-    if(write_on)
-        for(int gl_cnt=0;gl_cnt<quantiz;gl_cnt++)
-        {
-            for(int b=0;b<4;b++)
-            {
-                key_map(ip,b);
-
-
-                if((gl_cnt==0)&&(pressed[b]))
-                {
-                    ip.ki.dwFlags = 0; // KEYEVENTF_KEYDOWN for key release
-                    SendInput(1, &ip, sizeof(INPUT));
-                }
-            }
-
-            for(int b=0;b<4;b++)
-            {
-                key_map(ip,b);
-                if(((gl_cnt)>state[b]))
-                {
-                    ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-                    SendInput(1, &ip, sizeof(INPUT));
-                }
-                if(!pressed[b])
-                {
-                    ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-                    SendInput(1, &ip, sizeof(INPUT));
-                }
-            }
-            Sleep(4);
-        }
-
-
-}
+#include "control_rules.h"
+extern QLineEdit* error_LE;
 
 static auto list_devices( tobii_api_t* api )
 {
@@ -172,7 +31,12 @@ static auto list_devices( tobii_api_t* api )
         auto list = (std::vector<std::string>*) user_data;
         list->push_back( url );
     }, &result );
-    if( error != TOBII_ERROR_NO_ERROR ) std::cerr << "Failed to enumerate devices." << std::endl;
+    if( error != TOBII_ERROR_NO_ERROR )
+    {
+        std::cerr << "Failed to enumerate devices." << std::endl;
+        error_LE->insert("Failed to enumerate devices.\n");
+
+    }
 
     return result;
 }
@@ -206,7 +70,9 @@ static void log( void* log_context, tobii_log_level_t level, char const* text )
     std::lock_guard<std::mutex> lock(*(std::mutex*)log_context);
 
     if( level == TOBII_LOG_LEVEL_ERROR )
+    {
         std::cerr << "Logged error: " << text << std::endl;
+    }
 }
 
 
@@ -250,11 +116,14 @@ void core_func()
     if( devices.size() == 0 )
     {
         std::cerr << "No stream engine compatible device(s) found." << std::endl;
+        error_LE->insert("No stream engine compatible device(s) found.\n");
         tobii_api_destroy( api );
         //        return 1;
     }
     auto selected_device = devices.size() == 1 ? devices[ 0 ] : select_device( devices );
     std::cout << "Connecting to " << selected_device << "." << std::endl;
+    error_LE->insert("Connecting to ");
+    error_LE->insert(QString::number(selected_device[0]));
 
     tobii_device_t* device;
     error = tobii_device_create( api, selected_device.c_str(), &device );
@@ -301,6 +170,7 @@ void core_func()
                 {
                     std::cerr << "Connection was lost and reconnection failed." << std::endl;
                     //                    return;
+                    error_LE->insert("Connection was lost and reconnection failed.\n");
                 }
                 continue;
             }
