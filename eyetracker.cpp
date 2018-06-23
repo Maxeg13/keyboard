@@ -1,7 +1,7 @@
 #include <include/tobii/tobii.h>
 #include <include/tobii/tobii_streams.h>
-
-#include "virtual_control.h"
+#include <QMessageBox>
+#include "eyetracker.h"
 
 #pragma warning( push )
 #pragma warning( disable: 4548 4265 4255 4668 4355 4625 4571 4626 5026 5027 ) // disable warnings triggered by STL code
@@ -20,7 +20,8 @@
 #include <QTextEdit>
 std::thread* thread1;
 #include "control_rules.h"
-extern QTextEdit* error_TE;
+#include "mythread.h"
+//extern MyThread* thread_main;
 INPUT ip;
 float *x1, *x2;
 
@@ -38,7 +39,7 @@ static auto list_devices( tobii_api_t* api )
     if( error != TOBII_ERROR_NO_ERROR )
     {
         std::cerr << "Failed to enumerate devices." << std::endl;
-//        error_TE->setText("Failed to enumerate devices.\n");
+        //        error_TE->setText("Failed to enumerate devices.\n");
 
     }
 
@@ -120,14 +121,17 @@ void core_func()
     if( devices.size() == 0 )
     {
         std::cerr << "No stream engine compatible device(s) found." << std::endl;
-//        error_TE->setText("No stream engine compatible device(s) found.\n");
+        QMessageBox* msg=new QMessageBox();
+        msg->setText("No stream engine compatible device(s) found");
+        msg->exec();
+        //        error_TE->setText("No stream engine compatible device(s) found.\n");
         tobii_api_destroy( api );
         //        return 1;
     }
     auto selected_device = devices.size() == 1 ? devices[ 0 ] : select_device( devices );
     std::cout << "Connecting to " << selected_device << "." << std::endl;
-//    error_TE->setText("Connecting to ");
-//    error_TE->setText(QString::number(selected_device[0]));
+    //    thread_main->error_TE->setText("Connecting to ");
+    //    error_TE->setText(QString::number(selected_device[0]));
 
     tobii_device_t* device;
     error = tobii_device_create( api, selected_device.c_str(), &device );
@@ -153,8 +157,8 @@ void core_func()
 
             control(*x1, *(x1+1),ip);
         }
-}
-);
+    }
+    );
 
     std::thread thread(
                 [&exit_thread, device]()
@@ -175,7 +179,7 @@ void core_func()
                 {
                     std::cerr << "Connection was lost and reconnection failed." << std::endl;
                     //                    return;
-//                    error_TE->setText("Connection was lost and reconnection failed.\n");
+                    //                    error_TE->setText("Connection was lost and reconnection failed.\n");
                 }
                 continue;
             }
@@ -226,10 +230,10 @@ void core_func()
             //            x1=f1;
 }
             else
-           {
+    {
             std::cout << "Gaze point: " << gaze_point->timestamp_us << " INVALID" << std::endl;
-//            error_TE->setText("Gaze is lost\n");
-           }
+            //            error_TE->setText("Gaze is lost\n");
+}
 }, x1 );
     if( error != TOBII_ERROR_NO_ERROR )
     {

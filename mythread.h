@@ -1,19 +1,22 @@
 #ifndef THREAD_H
 #define THREAD_H
-#include "virtual_control.h"
+#include "eyetracker.h"
 #include <QThread>
+#include <QTextEdit>
+
 class MyThread : public QThread
 {
     Q_OBJECT
 public:
-//    explicit MyThread();
+    QTextEdit* error_TE;
+    MyThread();
 protected:
 
-    void run()
-    {core_func();}
+    void run();
 
-//public Q_SLOTS:
-//    void start();
+
+    //public Q_SLOTS:
+    //    void start();
 } ;
 
 

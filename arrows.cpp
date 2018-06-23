@@ -4,6 +4,10 @@
 #include <QPolygon>
 QTimer* timer;
 int cc;
+bool checked[4]={0,0,0,0};
+QPoint shift[4];
+float shift_c[4];
+int cnt_ar[4];
 //QTimer
 QPolygon pgn_o, pgn_ov;
 QPolygon  pgn[4];
@@ -49,14 +53,25 @@ void Arrows::paintEvent(QPaintEvent *e)
     int width=this->geometry().width();
     int height=this->geometry().height();
 
+    for(int i=0;i<4;i++)
+    {
+        checked[0]=1;
+        if(checked[i])
+            cnt_ar[i]++;
+        else cnt_ar[i]=0;
+
+        shift_c[i]=1-exp(-cnt_ar[i]*.4);
+    }
+
+
+
     int indent=100;
     for(int i=0;i<6;i++)
     {
-        pgn[0][i]=pgn_o[i]+QPoint(indent,height/2);
-
-        pgn[1][i]=-pgn_o[i]+QPoint(width-indent,height/2);
-        pgn[2][i]=pgn_ov[i]+QPoint(width/2,indent);
-        pgn[3][i]=-pgn_ov[i]+QPoint(width/2,height-indent);
+        pgn[0][i]=pgn_o[i]+QPoint(indent+100*shift_c[0],height/2);//left
+        pgn[1][i]=-pgn_o[i]+QPoint(width-indent,height/2)+shift[1];//right
+        pgn[2][i]=pgn_ov[i]+QPoint(width/2,indent)+shift[2];//up
+        pgn[3][i]=-pgn_ov[i]+QPoint(width/2,height-indent);//down
     }
 
 
@@ -73,8 +88,8 @@ void Arrows::paintEvent(QPaintEvent *e)
     {
         QPainterPath path;
         path.addPolygon(pgn[i]);
-
-        painter->fillPath(path,QBrush(Qt::white));
+        int h=55*shift_c[i]+200;
+        painter->fillPath(path,QBrush(QColor(h,h,h)));
     }
     //    painter->drawPolygon(pgn[0]);
     painter->setPen(QPen(QColor(0,0,255)));

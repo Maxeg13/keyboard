@@ -1,9 +1,10 @@
 #ifndef CONTROL_RULES_H
 #define CONTROL_RULES_H
 #include <QLineEdit>
+#include "arrows.h"
 float margin_x=0.05;
 float margin_y=0.17;
-extern bool write_on;
+extern bool emulate_on;
 extern float y_centre;
 extern float x_centre;
 int state[4]={0,0,0,0};
@@ -11,7 +12,7 @@ bool pressed[4]={0,0,0,0};
 float sens_div=0.02;
 //int gl_cnt=0;
 int quantiz=16;
-
+extern Arrows ars;
 
 int thresh(int x)
 {
@@ -28,16 +29,16 @@ void key_map(INPUT& ip, int b)
     {
     case 0:
         //AFTER VK_HELP
-        ip.ki.wVk = 0x41;
+        ip.ki.wVk = 0x41;//a
         break;
     case 1:
         ip.ki.wVk = 0x44;//d
         break;
     case 2:
-        ip.ki.wVk = 0x57;
+        ip.ki.wVk = 0x57;//w
         break;
     case 3:
-        ip.ki.wVk = 0x53;
+        ip.ki.wVk = 0x53;//s
     }
 }
 
@@ -112,7 +113,7 @@ void control(float x, float y, INPUT& ip)
         rule(x,y,ip,b);
     }
 
-    if(write_on)
+    if(emulate_on)
         for(int gl_cnt=0;gl_cnt<quantiz;gl_cnt++)
         {
             for(int b=0;b<4;b++)

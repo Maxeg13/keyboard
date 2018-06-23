@@ -13,18 +13,19 @@ class MainWindow : public QMainWindow
 public:
     Receiver* REC;
     QPushButton* start_b;
-    QPushButton* write_b;
+    QPushButton* emulate_b;
     void keyPressEvent(QKeyEvent *event);
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QSlider* sr_y_c;
 
 public slots:
+    void checkChanged();
     void btn_released();
     void refr();
 
     void closeEvent(QCloseEvent *);
-    void writeChange();
+    void emulateChange();
     void emulation();
 private:
 signals:
