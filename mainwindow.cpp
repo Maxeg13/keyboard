@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     centralWidget1->setLayout(GL);
 
     sr_y_c=new QSlider();
-    //    sr_x_c->setGeometry(QRect(0,0,200,50));
+    //    sr_x_c->setGeometry(Qudpt(0,0,200,50));
     sr_y_c->setOrientation(Qt::Vertical);
     //    sr_y_c->set
     sr_y_c->setRange(0,255);
@@ -92,9 +92,9 @@ MainWindow::MainWindow(QWidget *parent) :
 //    timer_emul=new QTimer;
 //    timer_emul->setInterval(4);
 //    timer_emul->start();
-    REC=new Receiver();
+    udp=new myUDP();
 
-    REC->setAddr(LE_addr->text());
+    udp->setAddr(LE_addr->text());
 
     setCentralWidget(centralWidget1);
     connect(lr_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
@@ -104,8 +104,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(emulate_b1,SIGNAL(released()),this,SLOT(emulateChange1()));
 //    connect(emulate_b2,SIGNAL(released()),this,SLOT(emulateChange1()));
     connect(LE_addr,SIGNAL(returnPressed()),this,SLOT(emitAddr()));
-    connect(this,SIGNAL(addr_sgn(QString)),REC,SLOT(setAddr(QString)));
-//    connect(REC,SIGNAL(sig_out(vector<uint8_t>)),this,SLOT(getEMG(vector<uint8_t>)));
+    connect(this,SIGNAL(addr_sgn(QString)),udp,SLOT(setAddr(QString)));
+//    connect(udp,SIGNAL(sig_out(vector<uint8_t>)),this,SLOT(getEMG(vector<uint8_t>)));
 //    connect(timer_emul,SIGNAL(timeout()),this,SLOT(emulation()));
 //    emit addr_sgn(LE_addr->text());
 }

@@ -10,7 +10,7 @@ INPUT ip2;
 char* byteptr;
 uint8_t readVar;
 QHostAddress* hostAddr;
-Receiver::Receiver(QWidget *parent)
+myUDP::myUDP(QWidget *parent)
     : QWidget(parent)
 {
     byteptr=new char;
@@ -26,12 +26,12 @@ Receiver::Receiver(QWidget *parent)
     else
         hostAddr=new QHostAddress("127.0.0.1");
 
-    udpSocket = new QUdpSocket(this);
+    socketForGetting = new QUdpSocket(this);
 
     //    quitButton = new QPushButton(tr("&Quit"));
     udpSocketSend= new QUdpSocket(this);
 
-//    udpSocketSend->connectToHost(*hostAddr,63211,QIODevice::ReadWrite);
+//    udpSocketSend->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
 
 
     timer=new QTimer();
@@ -42,14 +42,14 @@ Receiver::Receiver(QWidget *parent)
     //! [1]
 
 
-    udpSocket->bind(50123, QUdpSocket::ShareAddress);
-    connect(udpSocket, SIGNAL(readyRead()),
+//    socketForGetting->bind(50123, QUdpSocket::ShareAddress);
+    connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
 
 
 }
 
-void Receiver::setAddr(QString s)
+void myUDP::setAddr(QString s)
 {
     //! [0]
     if(udpSocketSend!=NULL)
@@ -58,13 +58,13 @@ void Receiver::setAddr(QString s)
     udpSocketSend= new QUdpSocket(this);
 
 //    udpSocketSend->connectToHost(*hostAddr,s.toInt(),QIODevice::ReadWrite);
-    udpSocketSend->bind(QHostAddress::LocalHost,49123);
+    udpSocketSend->bind(QHostAddress::LocalHost,49124);
 //udpSocketSend
 
-    //    qDebug()<<"set address";
+        qDebug()<<"set address";
 }
 
-void Receiver::control()
+void myUDP::control()
 {
     for (int b1=1;b1<6;b1++)
     {
@@ -77,7 +77,7 @@ void Receiver::control()
     ar.push_back(b2);
     if(udpSocketSend!=NULL)
 //        udpSocketSend->write(byteptr);
-        udpSocket->writeDatagram(ar,QHostAddress::LocalHost,49123);
+udpSocketSend->writeDatagram(ar,QHostAddress("127.0.0.1"),49123);
     for(int b=0;b<4;b++)
     {
         if(ars->checked[b])
@@ -93,24 +93,24 @@ void Receiver::control()
             QByteArray ar;
             ar.push_back(b1);
             if(udpSocketSend!=NULL)
-                udpSocketSend->write(byteptr);
-//                udpSocketSend->writeDatagram(ar,QHostAddress("127.0.0.1"),6666);
+//                udpSocketSend->write(byteptr);
+                udpSocketSend->writeDatagram(ar,QHostAddress("127.0.0.1"),49123);
         }
     }
 
 }
 
-void Receiver::processPendingDatagrams()
+void myUDP::processPendingDatagrams()
 {
     //    qDebug()<<"yes";
     static int ptr=0;
     static uint8_t key=255;
     static int S=4;
     static vector<byte> data;
-    while (udpSocket->hasPendingDatagrams()) {
+    while (socketForGetting->hasPendingDatagrams()) {
         QByteArray datagram;
-        datagram.resize(udpSocket->pendingDatagramSize());
-        udpSocket->readDatagram(datagram.data(), datagram.size());
+        datagram.resize(socketForGetting->pendingDatagramSize());
+        socketForGetting->readDatagram(datagram.data(), datagram.size());
         //        statusLabel->setText(tr("Received datagram: \"%1\"")
         //                             .arg(datagram.data()));
 

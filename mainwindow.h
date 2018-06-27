@@ -11,7 +11,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    Receiver* REC;
+    myUDP* udp;
     QPushButton* start_b;
     QPushButton *emulate_b1, *emulate_b2;
     void keyPressEvent(QKeyEvent *event);

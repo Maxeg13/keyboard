@@ -1,5 +1,5 @@
-#ifndef RECEIVER_H
-#define RECEIVER_H
+#ifndef myUDP_H
+#define myUDP_H
 
 
 
@@ -13,12 +13,12 @@ class QUdpSocket;
 class QAction;
 QT_END_NAMESPACE
 
-class Receiver : public QWidget
+class myUDP : public QWidget
 {
     Q_OBJECT
 
 public:
-    Receiver(QWidget *parent = 0);
+    myUDP(QWidget *parent = 0);
     QTimer* timer;
    public  slots:
     void processPendingDatagrams();
@@ -29,7 +29,7 @@ private:
 
     QLabel *statusLabel;
     QPushButton *quitButton;
-    QUdpSocket *udpSocket, *udpSocketSend;
+    QUdpSocket *socketForGetting, *udpSocketSend;
     signals:
     void sig_out(vector<uint8_t>);
 
@@ -37,4 +37,4 @@ private:
 
 
 
-#endif // RECEIVER_H
+#endif // myUDP_H
