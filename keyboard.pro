@@ -36,7 +36,8 @@ SOURCES += \
     arrows.cpp \
     udp.cpp \
     mythread.cpp \
-    eyetracker.cpp
+    eyetracker.cpp \
+    control_rules.cpp
 
 HEADERS += \
         mainwindow.h \

@@ -4,6 +4,7 @@
 
 
 #include <QWidget>
+#include "control_rules.h"
 using namespace std;
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -18,14 +19,17 @@ class Receiver : public QWidget
 
 public:
     Receiver(QWidget *parent = 0);
-
-private slots:
+    QTimer* timer;
+   public  slots:
     void processPendingDatagrams();
+    void setAddr(QString);
+    void control();
 
 private:
+
     QLabel *statusLabel;
     QPushButton *quitButton;
-    QUdpSocket *udpSocket;
+    QUdpSocket *udpSocket, *udpSocketSend;
     signals:
     void sig_out(vector<uint8_t>);
 

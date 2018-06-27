@@ -3,13 +3,18 @@
 #include <Windows.h>
 #include <QDialog>
 #include "Arrows.h"
+#include "udp.h"
+Arrows* ars;
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Arrows ars;
+
+    ars=new Arrows();
+
     MainWindow w;
-    ars.showFullScreen();
+    ars->showFullScreen();
     w.show();
     QObject::connect(&w,SIGNAL(close_sgn()),&a,SLOT(closeAllWindows()));
 

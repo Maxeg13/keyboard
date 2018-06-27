@@ -151,11 +151,11 @@ void core_func()
         ip.ki.wScan = 0; // hardware scan code for key
         ip.ki.time = 0;
         ip.ki.dwExtraInfo = 0;
-        Sleep(4000);
+//        Sleep(00);a
         while(1)
         {
 
-            control(*x1, *(x1+1),ip);
+            controlFromTracker(*x1, *(x1+1),ip);
         }
     }
     );

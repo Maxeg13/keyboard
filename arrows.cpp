@@ -4,35 +4,42 @@
 #include <QPolygon>
 QTimer* timer;
 int cc;
-bool checked[4]={0,0,0,0};
-QPoint shift[4];
+//bool checked[4]={0,0,0,0};
+int indent=100;
 float shift_c[4];
 int cnt_ar[4];
 //QTimer
 QPolygon pgn_o, pgn_ov;
 QPolygon  pgn[4];
+QColor band1_clr, band2_clr[4];
+int width_ar=100;
+int thick=width_ar*0.5;
+int height_ar=190;
+
 Arrows::Arrows(QWidget *parent) : QWidget(parent)
 {
-    int width=100;
-    int thick=width*0.4;
-    int height=190;
-    pgn_o.push_back(QPoint(-width/2,-height/2));
-    pgn_o.push_back(QPoint(-width/2+thick,-height/2));
-    //    pgn_o.push_back(QPoint(0,-height/2));
-    pgn_o.push_back(QPoint(width/2,0));
-    pgn_o.push_back(QPoint(-width/2+thick,height/2));
-    pgn_o.push_back(QPoint(-width/2,height/2));
-    pgn_o.push_back(QPoint(width/2-thick,0));
+    band1_clr=QColor(100,255,100);
+//    band2_clr=QColor(255,255,255);
+    pgn_o.resize(0);
+    pgn_o.resize(0);
 
-    thick=width*0.4;
+    pgn_o.push_back(QPoint(width_ar/2,-height_ar/2));
+    pgn_o.push_back(QPoint(width_ar/2-thick,-height_ar/2));
+    //    pgn_o.push_back(QPoint(0,-height_ar/2));
+    pgn_o.push_back(QPoint(-width_ar/2,0));
+    pgn_o.push_back(QPoint(width_ar/2-thick,height_ar/2));
+    pgn_o.push_back(QPoint(width_ar/2,height_ar/2));
+    pgn_o.push_back(QPoint(-width_ar/2+thick,0));
+
+    thick=width_ar*0.5;
     float scr=1.2;
-    pgn_ov.push_back(QPoint(-height/2*scr,-width/2));
-    pgn_ov.push_back(QPoint(-height/2*scr,-width/2+thick));
-    //    pgn_o.push_back(QPoint(0,-height/2));
-    pgn_ov.push_back(QPoint(0,width/2));
-    pgn_ov.push_back(QPoint(height/2*scr,-width/2+thick));
-    pgn_ov.push_back(QPoint(height/2*scr,-width/2));
-    pgn_ov.push_back(QPoint(0,width/2-thick));
+    pgn_ov.push_back(QPoint(-height_ar/2*scr,width_ar/2));
+    pgn_ov.push_back(QPoint(-height_ar/2*scr,width_ar/2-thick));
+    //    pgn_o.push_back(QPoint(0,-height_ar/2));
+    pgn_ov.push_back(QPoint(0,-width_ar/2));
+    pgn_ov.push_back(QPoint(height_ar/2*scr,width_ar/2-thick));
+    pgn_ov.push_back(QPoint(height_ar/2*scr,width_ar/2));
+    pgn_ov.push_back(QPoint(0,-width_ar/2+thick));
 
     for(int i=0;i<4;i++)
         pgn[i].resize(6);
@@ -49,13 +56,18 @@ Arrows::Arrows(QWidget *parent) : QWidget(parent)
 
 void Arrows::paintEvent(QPaintEvent *e)
 {
+    QBrush brush;
     cc++;
     int width=this->geometry().width();
     int height=this->geometry().height();
+    centre[0]=QPoint(indent,height/2);
+    centre[1]=QPoint(width-indent,height/2);
+    centre[2]=QPoint(width/2,indent);
+    centre[3]=QPoint(width/2,height-indent);
 
     for(int i=0;i<4;i++)
     {
-        checked[0]=1;
+        //        checked[0]=1;
         if(checked[i])
             cnt_ar[i]++;
         else cnt_ar[i]=0;
@@ -63,21 +75,18 @@ void Arrows::paintEvent(QPaintEvent *e)
         shift_c[i]=1-exp(-cnt_ar[i]*.4);
     }
 
-
-
-    int indent=100;
+    float shift_k=0.16;
     for(int i=0;i<6;i++)
     {
-        pgn[0][i]=pgn_o[i]+QPoint(indent+100*shift_c[0],height/2);//left
-        pgn[1][i]=-pgn_o[i]+QPoint(width-indent,height/2)+shift[1];//right
-        pgn[2][i]=pgn_ov[i]+QPoint(width/2,indent)+shift[2];//up
-        pgn[3][i]=-pgn_ov[i]+QPoint(width/2,height-indent);//down
+        pgn[0][i]=pgn_o[i]*(1+shift_k*shift_c[0])+centre[0];//left
+        pgn[1][i]=-pgn_o[i]*(1+shift_k*shift_c[1])+centre[1];//right
+        pgn[2][i]=pgn_ov[i]*(1+shift_k*shift_c[2])+centre[2];//up
+        pgn[3][i]=-pgn_ov[i]*(1+shift_k*shift_c[3])+centre[3];//down
     }
 
-
+    //    arrow_rect[i]=QRect();
 
     QPainter* painter=new QPainter(this);
-
 
 
 
@@ -86,10 +95,41 @@ void Arrows::paintEvent(QPaintEvent *e)
 
     for(int i=0;i<4;i++)
     {
+
         QPainterPath path;
         path.addPolygon(pgn[i]);
-        int h=55*shift_c[i]+200;
-        painter->fillPath(path,QBrush(QColor(h,h,h)));
+        int h=85*shift_c[i]+170;
+        band2_clr[i]=QColor(h,h,h);
+        QLinearGradient gradient1;
+        int grad_space=350;
+        switch(i)
+        {
+        case 0:
+             gradient1=QLinearGradient(0,height/2,grad_space,height/2);break;
+        case 1:
+             gradient1=QLinearGradient(width,height/2,width-grad_space,height/2);break;
+        case 2:
+            gradient1=QLinearGradient(width/2,0,width/2,grad_space);break;
+        case 3:
+            gradient1=QLinearGradient(width/2,height,width/2,height-grad_space);
+        }
+
+
+        int speed=7;
+        int interval=100;
+        gradient1.setColorAt(((cnt_ar[i]*speed-10+interval)%interval)/(float)interval, band2_clr[i]);
+        gradient1.setColorAt(((cnt_ar[i]*speed)%interval)/(float)interval, band1_clr);
+        gradient1.setColorAt(((cnt_ar[i]*speed+10)%interval)/(float)interval, band2_clr[i]);
+
+        gradient1.setColorAt(((cnt_ar[i]*speed-40+interval)%interval)/(float)interval, band2_clr[i]);
+        gradient1.setColorAt(((cnt_ar[i]*speed-30+interval)%interval)/(float)interval, band1_clr);
+        gradient1.setColorAt(((cnt_ar[i]*speed-20+interval)%interval)/(float)interval, band2_clr[i]);
+
+
+        //        brush.setColor(gradient1);
+        painter->setBrush(gradient1);
+        painter->drawPolygon(pgn[i]);
+        //        painter->fillPath(path,QBrush(QColor(h,h,h)));
     }
     //    painter->drawPolygon(pgn[0]);
     painter->setPen(QPen(QColor(0,0,255)));
