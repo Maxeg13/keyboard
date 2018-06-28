@@ -48,7 +48,7 @@ myUDP::myUDP(QWidget *parent)
     //! [1]
 
 
-    socketForGetting->bind(readPort.toInt(), QUdpSocket::ShareAddress);
+    socketForGetting->bind(*hostAddr,(quint16)(readPort.toInt()));
     connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
 
