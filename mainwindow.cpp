@@ -13,6 +13,7 @@ float y_centre=.6;
 float x_centre=0.5;
 bool emulate_from_tracker_on=1;
 bool lr_checked=1;
+bool kb_layout_checked=1;
 bool downup_checked=1;
 
 //extern QTextEdit* error_TE;
@@ -21,7 +22,7 @@ QLabel* UDP_label;
 MyThread* thread_main;
 QGroupBox* tracker_box;
 QGroupBox* UDP_box;
-QCheckBox *downup_check, *lr_check;
+QCheckBox *downup_check, *lr_check, *kb_layout_check;
 QGridLayout lyt1;
 QGridLayout lyt2;
 QTimer* timer_emul;
@@ -58,6 +59,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget *centralWidget1=new QWidget();
     centralWidget1->setLayout(GL);
 
+    kb_layout_check=new QCheckBox("wasd keyboard layout");
+    kb_layout_check->setChecked(1);
+    downup_check=new QCheckBox("upward-back");
+    downup_check->setChecked(true);
+    lr_check=new QCheckBox("left-right");
+    lr_check->setChecked(true);
+
     sr_y_c=new QSlider();
     //    sr_x_c->setGeometry(Qudpt(0,0,200,50));
     sr_y_c->setOrientation(Qt::Vertical);
@@ -71,11 +79,9 @@ MainWindow::MainWindow(QWidget *parent) :
     GL->addWidget(UDP_box,0,1);
     GL->addWidget(start_b,1,0);
     GL->addWidget(emulate_b1,1,1);
+    GL->addWidget(kb_layout_check,2,1);
 
-    downup_check=new QCheckBox("upward-back");
-    downup_check->setChecked(true);
-    lr_check=new QCheckBox("left-right");
-    lr_check->setChecked(true);
+
 
     tracker_box->setLayout(&lyt1);
     lyt1.addWidget(sr_y_c,0,0,3,1);
@@ -90,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setMinimumWidth(350);
     udp=new myUDP();
 
-    UDP_label->setText(QString("srd client port: ")+udp->srdClientPort+QString("\nread port: ")+udp->readPort);
+    UDP_label->setText(QString("srd client port: ")+udp->srdClientPort+QString("\nemulator port: ")+udp->readPort);
 //    udp->setAddr(LE_addr->text());
 
     setCentralWidget(centralWidget1);

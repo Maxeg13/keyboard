@@ -5,6 +5,7 @@ extern bool emulate_from_tracker_on;
 extern float y_centre;
 extern float x_centre;
 extern bool lr_checked;
+extern bool kb_layout_checked;
 extern bool downup_checked;
 int state[4]={0,0,0,0};
 bool pressed[4]={0,0,0,0};
@@ -25,24 +26,45 @@ int thresh(int x)
 
 void key_map(INPUT& ip, int b)
 {
-    switch(b)
-    {
-    case 0:
-        //AFTER VK_HELP
-        ip.ki.wVk = 0x41;//a
-        break;
-    case 1:
-        ip.ki.wVk = 0x44;//d
-        break;
-    case 2:
-        ip.ki.wVk = 0x57;//w
-        break;
-    case 3:
-        ip.ki.wVk = 0x53;//s
-        break;
-    case 4:
-        ip.ki.wVk = VK_SPACE;
-    }
+    if(kb_layout_checked)
+        switch(b)
+        {
+        case 0:
+            //AFTER VK_HELP
+            ip.ki.wVk = 0x41;//a
+            break;
+        case 1:
+            ip.ki.wVk = 0x44;//d
+            break;
+        case 2:
+            ip.ki.wVk = 0x57;//w
+            break;
+        case 3:
+            ip.ki.wVk = 0x53;//s
+            break;
+        case 4:
+            ip.ki.wVk = VK_SPACE;
+        }
+    else
+        switch(b)
+        {
+        case 0:
+            //AFTER VK_HELP
+            ip.ki.wVk = VK_LEFT;//a
+            break;
+        case 1:
+            ip.ki.wVk = VK_RIGHT;//d
+            break;
+        case 2:
+            ip.ki.wVk = VK_UP;//w
+            break;
+        case 3:
+            ip.ki.wVk = VK_DOWN;//s
+            break;
+        case 4:
+            ip.ki.wVk = VK_SPACE;
+
+        }
 }
 
 void rule(float x, float y, INPUT& ip, int b)
@@ -111,7 +133,7 @@ void rule(float x, float y, INPUT& ip, int b)
 
 void simple_tracker_rule(float x, float y, INPUT& ip, int b)
 {
-//    pressed_ptr=pressed;
+    //    pressed_ptr=pressed;
     key_map(ip,b);
 
     int h=QPoint::dotProduct(ars->centre[b]-QPoint(x*ars->width(),y*ars->height()),
@@ -164,8 +186,8 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
         pressed[b]=1;
         if((((b==0)||(b==1))&&!lr_checked)||(((b==2)||(b==3))&&!downup_checked))
         {
-        ip.ki.dwFlags =0;
-        SendInput(1, &ip, sizeof(INPUT));
+            ip.ki.dwFlags =0;
+            SendInput(1, &ip, sizeof(INPUT));
         }
         UDP_cnt[b]=0;
     }
@@ -183,8 +205,8 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
         pressed[b]=0;
         if((((b==0)||(b==1))&&!lr_checked)||(((b==2)||(b==3))&&!downup_checked))
         {
-        ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-        SendInput(1, &ip, sizeof(INPUT));
+            ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+            SendInput(1, &ip, sizeof(INPUT));
         }
     }
     ars->checked[b]=pressed[b];
@@ -196,7 +218,7 @@ void controlFromTracker(float x, float y, INPUT& ip)
     for(int b=0;b<4;b++)
     {
         simple_tracker_rule(x,y,ip,b);
-//        rule(x,y,ip,b);
+        //        rule(x,y,ip,b);
     }
 
     if(emulate_from_tracker_on)

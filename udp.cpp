@@ -9,7 +9,7 @@ extern Arrows* ars;
 INPUT ip2;
 char* byteptr;
 uint8_t readVar;
-QHostAddress* hostAddr;
+QHostAddress* addr_var;
 myUDP::myUDP(QWidget *parent)
     : QWidget(parent)
 {
@@ -21,7 +21,7 @@ myUDP::myUDP(QWidget *parent)
     {
         QTextStream in(&inputFile);
                in.readLine();
-        hostAddr=new QHostAddress(in.readLine());
+        addr_var=new QHostAddress(in.readLine());
         in.readLine();
         readPort=in.readLine();
         in.readLine();
@@ -30,7 +30,7 @@ myUDP::myUDP(QWidget *parent)
     }
     else
     {
-        hostAddr=new QHostAddress("127.0.0.2");
+        addr_var=new QHostAddress("127.0.0.2");
         srdClientPort=QString(2222);
         readPort=QString(3333);
     }
@@ -51,7 +51,7 @@ myUDP::myUDP(QWidget *parent)
     //! [1]
 
 
-    socketForGetting->bind(QHostAddress::LocalHost,(quint16)(readPort.toInt()));
+    socketForGetting->bind(*addr_var,(quint16)(readPort.toInt()));
     connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
 
@@ -70,6 +70,12 @@ void myUDP::control()
         controlFromUDP( ip2,b1,0);
 
     }
+//    *byteptr=2;
+//    QByteArray ar;
+//    ar.push_back(2);
+//            if(srdSocket!=NULL)
+//                srdSocket->write(byteptr);
+//        srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
 
     for(int b=0;b<4;b++)
     {
@@ -80,7 +86,7 @@ void myUDP::control()
             case 0:b1=2;break;
             case 1:b1=3;break;
             case 2:b1=4;break;
-            case 3: b1=5;break;
+            case 3:b1=5;break;
             }
             *byteptr=b1;
             QByteArray ar;
@@ -88,7 +94,7 @@ void myUDP::control()
 //            if(srdSocket!=NULL)
 //                srdSocket->write(byteptr);
                 srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
-                simSocket->writeDatagram(ar,*hostAddr,srdClientPort.toInt());
+                simSocket->writeDatagram(ar,*addr_var,srdClientPort.toInt());
         }
     }
 
