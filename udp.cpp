@@ -20,14 +20,17 @@ myUDP::myUDP(QWidget *parent)
     if (inputFile.open(QIODevice::ReadOnly))
     {
         QTextStream in(&inputFile);
-//               in.readLine();
+               in.readLine();
         hostAddr=new QHostAddress(in.readLine());
-        srdClientPort=in.readLine();
+        in.readLine();
         readPort=in.readLine();
+        in.readLine();
+        srdClientPort=in.readLine();
+
     }
     else
     {
-        hostAddr=new QHostAddress("127.0.0.1");
+        hostAddr=new QHostAddress("127.0.0.2");
         srdClientPort=QString(2222);
         readPort=QString(3333);
     }
@@ -36,7 +39,7 @@ myUDP::myUDP(QWidget *parent)
 
     //    quitButton = new QPushButton(tr("&Quit"));
     srdSocket= new QUdpSocket(this);
-
+    simSocket= new QUdpSocket(this);
 //    srdSocket->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
 
 
@@ -48,7 +51,7 @@ myUDP::myUDP(QWidget *parent)
     //! [1]
 
 
-    socketForGetting->bind(*hostAddr,(quint16)(readPort.toInt()));
+    socketForGetting->bind(QHostAddress::LocalHost,(quint16)(readPort.toInt()));
     connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
 
@@ -84,7 +87,8 @@ void myUDP::control()
             ar.push_back(b1);
 //            if(srdSocket!=NULL)
 //                srdSocket->write(byteptr);
-                srdSocket->writeDatagram(ar,QHostAddress("127.0.0.1"),srdClientPort.toInt());
+                srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
+                simSocket->writeDatagram(ar,*hostAddr,srdClientPort.toInt());
         }
     }
 

@@ -31,7 +31,7 @@ private:
 
     QLabel *statusLabel;
     QPushButton *quitButton;
-    QUdpSocket *socketForGetting, *srdSocket;
+    QUdpSocket *socketForGetting, *srdSocket, *simSocket;
     signals:
     void sig_out(vector<uint8_t>);
 
