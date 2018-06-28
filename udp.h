@@ -18,6 +18,8 @@ class myUDP : public QWidget
     Q_OBJECT
 
 public:
+    QString readPort;
+    QString srdClientPort;
     myUDP(QWidget *parent = 0);
     QTimer* timer;
    public  slots:
@@ -29,7 +31,7 @@ private:
 
     QLabel *statusLabel;
     QPushButton *quitButton;
-    QUdpSocket *socketForGetting, *udpSocketSend;
+    QUdpSocket *socketForGetting, *srdSocket;
     signals:
     void sig_out(vector<uint8_t>);
 

@@ -16,22 +16,28 @@ myUDP::myUDP(QWidget *parent)
     byteptr=new char;
     //    statusLabel = new QLabel(tr("Listening for broadcasted messages"));
     //    statusLabel->setWordWrap(true);
-    QFile inputFile("clientAddr.txt");
+    QFile inputFile("UDP_settings.txt");
     if (inputFile.open(QIODevice::ReadOnly))
     {
         QTextStream in(&inputFile);
-        //       in.readLine();
+//               in.readLine();
         hostAddr=new QHostAddress(in.readLine());
+        srdClientPort=in.readLine();
+        readPort=in.readLine();
     }
     else
+    {
         hostAddr=new QHostAddress("127.0.0.1");
+        srdClientPort=QString(2222);
+        readPort=QString(3333);
+    }
 
     socketForGetting = new QUdpSocket(this);
 
     //    quitButton = new QPushButton(tr("&Quit"));
-    udpSocketSend= new QUdpSocket(this);
+    srdSocket= new QUdpSocket(this);
 
-//    udpSocketSend->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
+//    srdSocket->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
 
 
     timer=new QTimer();
@@ -42,7 +48,7 @@ myUDP::myUDP(QWidget *parent)
     //! [1]
 
 
-//    socketForGetting->bind(50123, QUdpSocket::ShareAddress);
+    socketForGetting->bind(readPort.toInt(), QUdpSocket::ShareAddress);
     connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
 
@@ -51,17 +57,7 @@ myUDP::myUDP(QWidget *parent)
 
 void myUDP::setAddr(QString s)
 {
-    //! [0]
-    if(udpSocketSend!=NULL)
-        delete udpSocketSend;
 
-    udpSocketSend= new QUdpSocket(this);
-
-//    udpSocketSend->connectToHost(*hostAddr,s.toInt(),QIODevice::ReadWrite);
-    udpSocketSend->bind(QHostAddress::LocalHost,49124);
-//udpSocketSend
-
-        qDebug()<<"set address";
 }
 
 void myUDP::control()
@@ -71,13 +67,7 @@ void myUDP::control()
         controlFromUDP( ip2,b1,0);
 
     }
-    char b2=3;
-    *byteptr=b2;
-    QByteArray ar;
-    ar.push_back(b2);
-    if(udpSocketSend!=NULL)
-//        udpSocketSend->write(byteptr);
-udpSocketSend->writeDatagram(ar,QHostAddress("127.0.0.1"),49123);
+
     for(int b=0;b<4;b++)
     {
         if(ars->checked[b])
@@ -92,9 +82,9 @@ udpSocketSend->writeDatagram(ar,QHostAddress("127.0.0.1"),49123);
             *byteptr=b1;
             QByteArray ar;
             ar.push_back(b1);
-            if(udpSocketSend!=NULL)
-//                udpSocketSend->write(byteptr);
-                udpSocketSend->writeDatagram(ar,QHostAddress("127.0.0.1"),49123);
+//            if(srdSocket!=NULL)
+//                srdSocket->write(byteptr);
+                srdSocket->writeDatagram(ar,QHostAddress("127.0.0.1"),srdClientPort.toInt());
         }
     }
 

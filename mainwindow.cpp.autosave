@@ -65,9 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     sr_y_c->setRange(0,255);
     sr_y_c->setValue(60);
 
-    //    error_TE=new QTextEdit;
-
-    //    GL->addWidget(sr_y_c,0,0,3,1);
+ 
 
     GL->addWidget(tracker_box,0,0);
     GL->addWidget(UDP_box,0,1);
@@ -87,15 +85,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     UDP_box->setLayout((&lyt2));
     lyt2.addWidget(UDP_label,0,0);
-//    lyt2.addWidget(LE_addr,1,0);
-    //    lyt2.addWidget(emulate_b2,2,1);
-    //    GL->addWidget(thread_main->error_TE,2,1,1,1);
+
 
     this->setMinimumWidth(350);
-    //    core_func();
-    //    timer_emul=new QTimer;
-    //    timer_emul->setInterval(4);
-    //    timer_emul->start();
     udp=new myUDP();
 
     UDP_label->setText(QString("srd client port: ")+udp->srdClientPort+QString("\nread port: ")+udp->readPort);
