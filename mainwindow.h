@@ -12,9 +12,10 @@ class MainWindow : public QMainWindow
 
 public:
     myUDP* udp;
+//    QPushButton* proxy_b;
     QPushButton* start_b;
     QPushButton *emulate_b1, *emulate_b2;
-    void keyPressEvent(QKeyEvent *event);
+//    void keyPressEvent(QKeyEvent *event);
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QSlider* sr_y_c;
@@ -27,7 +28,7 @@ public slots:
 
     void closeEvent(QCloseEvent *);
     void emulateChange1();
-    void emulation();
+//    void emulation();
 private:
 signals:
     void addr_sgn(QString );

@@ -18,6 +18,9 @@ int height_ar=190;
 
 Arrows::Arrows(QWidget *parent) : QWidget(parent)
 {
+    setStyleSheet("background:transparent;");
+    setAttribute(Qt::WA_TranslucentBackground);
+    setWindowFlags(Qt::FramelessWindowHint);
     band1_clr=QColor(100,255,100);
 //    band2_clr=QColor(255,255,255);
     pgn_o.resize(0);
@@ -90,8 +93,8 @@ void Arrows::paintEvent(QPaintEvent *e)
 
 
 
-    painter->setBrush(Qt::black);
-    painter->drawRect(QRect(this->geometry()));
+//    painter->setBrush(QColor(0,0,0,255));
+//    painter->drawRect(QRect(this->geometry()));
 
     for(int i=0;i<4;i++)
     {

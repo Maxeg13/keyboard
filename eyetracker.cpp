@@ -12,17 +12,18 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <windows.h>
 #pragma warning( pop )
 
 #define WINVER 0x0500
-#include <windows.h>
+INPUT ip;
 #include <conio.h>
 #include <QTextEdit>
 std::thread* thread1;
 #include "control_rules.h"
 #include "mythread.h"
 //extern MyThread* thread_main;
-INPUT ip;
+
 float *x1, *x2;
 
 
@@ -147,10 +148,10 @@ void core_func()
     thread1=new std::thread(
                 [x1]()
     {
-        ip.type = INPUT_KEYBOARD;
-        ip.ki.wScan = 0; // hardware scan code for key
-        ip.ki.time = 0;
-        ip.ki.dwExtraInfo = 0;
+//        ip.type = INPUT_KEYBOARD;
+//        ip.ki.wScan = 0; // hardware scan code for key
+//        ip.ki.time = 0;
+//        ip.ki.dwExtraInfo = 0;
 //        Sleep(00);a
         while(1)
         {

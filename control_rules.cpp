@@ -1,12 +1,13 @@
 #include "control_rules.h"
 float margin_x=0.04;
 float margin_y=0.17;
-extern bool emulate_from_tracker_on;
+extern bool emulate_on;
 extern float y_centre;
 extern float x_centre;
 extern bool lr_checked;
-extern bool kb_layout_checked;
 extern bool downup_checked;
+extern bool kb_layout_checked;
+
 int state[4]={0,0,0,0};
 bool pressed[4]={0,0,0,0};
 float sens_div=0.016;
@@ -22,6 +23,37 @@ int thresh(int x)
         return x;
     else
         return quantiz;
+}
+
+void littleControl(INPUT& ip, int b, int r)
+{
+//    Sleep(1100);
+    key_map(ip,b);
+
+//    ip.ki.dwFlags =0;
+//    qDebug()<<b;
+//    qDebug()<<ip.ki.dwFlags;
+//    qDebug()<<"\n";
+
+//    SendInput(1, &ip, sizeof(INPUT));
+
+    if(r)
+    {
+
+        ip.ki.dwFlags =0;
+        pressed[b]=1;
+    }
+    else
+    {
+        ip.ki.dwFlags=KEYEVENTF_KEYUP;
+        pressed[b]=0;
+    }
+    if(emulate_on)
+    {
+//Sleep(1000);
+        SendInput(1, &ip, sizeof(INPUT));
+    }
+    ars->checked[b]=pressed[b];
 }
 
 void key_map(INPUT& ip, int b)
@@ -168,48 +200,72 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
     int b;
     switch(b1)
     {
-    case 1:
-        b=4;break;
-    case 2:
-        b=0;break;
-    case 3:
-        b=1;break;
-    case 4:
+    case 1://
         b=2;break;
+    case 2:
+        b=3;break;
+    case 3:
+        b=0;break;
+    case 4://
+        b=1;break;//
     case 5:
-        b=3;
+        b=6;
     }
-    key_map(ip,b);
+
+    //    if(b!=6)
     if(sended)
     {
-        qDebug()<<b1;
-        pressed[b]=1;
+
+        //        qDebug()<<b1;//34 влево вправо
+
         if((((b==0)||(b==1))&&!lr_checked)||(((b==2)||(b==3))&&!downup_checked))
         {
-            ip.ki.dwFlags =0;
-            SendInput(1, &ip, sizeof(INPUT));
+            for(int i=0;i<4;i++)
+            {
+                if(i!=b)
+                {
+                    littleControl(ip,i,0);
+                }
+            }
+            littleControl(ip,b,1);
         }
-        UDP_cnt[b]=0;
-    }
-
-    if(!sended)
-    {
-
-        UDP_cnt[b]++;
-        if(UDP_cnt[b]>time_steps)UDP_cnt[b]=time_steps+1;
-
-    }
-
-    if(UDP_cnt[b]==time_steps)
-    {
-        pressed[b]=0;
-        if((((b==0)||(b==1))&&!lr_checked)||(((b==2)||(b==3))&&!downup_checked))
+        if(b==6)
         {
-            ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-            SendInput(1, &ip, sizeof(INPUT));
+            for(int i=0;i<4;i++)
+            {
+                littleControl(ip,i,0);
+            }
         }
+
+        //        UDP_cnt[b]=0;
     }
-    ars->checked[b]=pressed[b];
+    //    qDebug()<<b1;
+    //    for(int i=0;i<4;i++)
+    //    {
+    //        qDebug()<<pressed[i];
+    //        qDebug()<<ars->checked[i];
+
+    //    }
+    //    if(!sended)
+    //    {
+
+    //        UDP_cnt[b]++;
+    //        if(UDP_cnt[b]>time_steps)UDP_cnt[b]=time_steps+1;
+
+    //    }
+
+    //    if(UDP_cnt[b]==time_steps)
+    //    {
+
+    //        if((((b==0)||(b==1))&&!lr_checked)||(((b==2)||(b==3))&&!downup_checked))
+    //        {
+    //            pressed[b]=0;
+    //            ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+    //            SendInput(1, &ip, sizeof(INPUT));
+    //            ars->checked[b]=pressed[b];
+    //        }
+    //    }
+
 }
 
 void controlFromTracker(float x, float y, INPUT& ip)
@@ -221,32 +277,38 @@ void controlFromTracker(float x, float y, INPUT& ip)
         //        rule(x,y,ip,b);
     }
 
-    if(emulate_from_tracker_on)
+    if(emulate_on)
         for(int gl_cnt=0;gl_cnt<quantiz;gl_cnt++)
         {
             for(int b=0;b<4;b++)
             {
                 key_map(ip,b);
-                if((gl_cnt==0)&&(pressed[b]))
-                {
-                    ip.ki.dwFlags = 0; // KEYEVENTF_KEYDOWN for key release
-                    SendInput(1, &ip, sizeof(INPUT));
-                }
+
+                if((((b==0)||(b==1))&&lr_checked)||(((b==2)||(b==3))&&downup_checked))
+                    if((gl_cnt==0)&&(pressed[b]))
+                    {
+                        ip.ki.dwFlags = 0; // KEYEVENTF_KEYDOWN for key release
+                        SendInput(1, &ip, sizeof(INPUT));
+                    }
             }
 
             for(int b=0;b<4;b++)
             {
                 key_map(ip,b);
-                if(((gl_cnt)>=state[b]))
-                {
-                    ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-                    SendInput(1, &ip, sizeof(INPUT));
-                }
-                if(!pressed[b])
-                {
-                    ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-                    SendInput(1, &ip, sizeof(INPUT));
-                }
+
+                if((((b==0)||(b==1))&&lr_checked)||(((b==2)||(b==3))&&downup_checked))
+                    if(((gl_cnt)>=state[b]))
+                    {
+                        ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+                        SendInput(1, &ip, sizeof(INPUT));
+                    }
+
+                if((((b==0)||(b==1))&&lr_checked)||(((b==2)||(b==3))&&downup_checked))
+                    if(!pressed[b])
+                    {
+                        ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+                        SendInput(1, &ip, sizeof(INPUT));
+                    }
             }
             Sleep(4);
         }

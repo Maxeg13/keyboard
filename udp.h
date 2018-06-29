@@ -20,6 +20,7 @@ class myUDP : public QWidget
 public:
     QString readPort;
     QString srdClientPort;
+    QString remoteClientPort;
     myUDP(QWidget *parent = 0);
     QTimer* timer;
    public  slots:

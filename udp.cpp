@@ -4,15 +4,23 @@
 #include <QtNetwork>
 #include "arrows.h"
 #include <QFile>
-
+//#include "eyetracker.h"
+extern INPUT ip;
+extern bool lr_checked;
+extern bool downup_checked;
+extern bool proxy_checked;
 extern Arrows* ars;
-INPUT ip2;
+//INPUT ip2;
 char* byteptr;
 uint8_t readVar;
 QHostAddress* addr_var;
 myUDP::myUDP(QWidget *parent)
     : QWidget(parent)
 {
+    ip.type = INPUT_KEYBOARD;
+    ip.ki.wScan = 0; // hardware scan code for key
+    ip.ki.time = 0;
+    ip.ki.dwExtraInfo = 0;
     byteptr=new char;
     //    statusLabel = new QLabel(tr("Listening for broadcasted messages"));
     //    statusLabel->setWordWrap(true);
@@ -20,19 +28,21 @@ myUDP::myUDP(QWidget *parent)
     if (inputFile.open(QIODevice::ReadOnly))
     {
         QTextStream in(&inputFile);
-               in.readLine();
+        in.readLine();
         addr_var=new QHostAddress(in.readLine());
         in.readLine();
         readPort=in.readLine();
         in.readLine();
         srdClientPort=in.readLine();
-
+        in.readLine();
+        remoteClientPort=in.readLine();
     }
     else
     {
         addr_var=new QHostAddress("127.0.0.2");
         srdClientPort=QString(2222);
         readPort=QString(3333);
+        remoteClientPort=QString(4444);
     }
 
     socketForGetting = new QUdpSocket(this);
@@ -40,22 +50,21 @@ myUDP::myUDP(QWidget *parent)
     //    quitButton = new QPushButton(tr("&Quit"));
     srdSocket= new QUdpSocket(this);
     simSocket= new QUdpSocket(this);
-//    srdSocket->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
+    //    srdSocket->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
 
 
     timer=new QTimer();
-    timer->setInterval(10);
+    timer->setInterval(50);
     timer->start();
 
     connect(timer,SIGNAL(timeout()),this,SLOT(control()));
     //! [1]
 
-
-    socketForGetting->bind(*addr_var,(quint16)(readPort.toInt()));
+    //    socketForGetting->bind(*addr_var,(quint16)(readPort.toInt()));
+//    socketForGetting->bind(QHostAddress::LocalHost,(quint16)(readPort.toInt()));
+        socketForGetting->bind(QHostAddress::Any,(quint16)(readPort.toInt()));
     connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
-
-
 }
 
 void myUDP::setAddr(QString s)
@@ -65,44 +74,57 @@ void myUDP::setAddr(QString s)
 
 void myUDP::control()
 {
-    for (int b1=1;b1<6;b1++)
-    {
-        controlFromUDP( ip2,b1,0);
 
-    }
-//    *byteptr=2;
-//    QByteArray ar;
-//    ar.push_back(2);
-//            if(srdSocket!=NULL)
-//                srdSocket->write(byteptr);
-//        srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
+    //    ip.ki.dwFlags =0;
+    //    key_map(ip,0);
+    //    SendInput(1, &ip, sizeof(INPUT));
 
+    //    if(proxy_checked)
+    //        for (int b1=1;b1<6;b1++)
+    //        {
+    //            controlFromUDP( ip2,b1,0);
+    //        }
+    //    *byteptr=2;
+    //    QByteArray ar;
+    //    ar.push_back(2);
+    //            if(srdSocket!=NULL)
+    //                srdSocket->write(byteptr);
+    //        srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
+    uint8_t b1=0;
+    int noth=0;
     for(int b=0;b<4;b++)
     {
         if(ars->checked[b])
-        {       char b1;
+        {
             switch(b)
             {
-            case 0:b1=2;break;
-            case 1:b1=3;break;
-            case 2:b1=4;break;
-            case 3:b1=5;break;
+            case 2:b1=1;break;
+            case 1:b1=4;break;
+            case 0:b1=3;break;
+            case 3:b1=2;break;
             }
-            *byteptr=b1;
-            QByteArray ar;
-            ar.push_back(b1);
-//            if(srdSocket!=NULL)
-//                srdSocket->write(byteptr);
-                srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
-                simSocket->writeDatagram(ar,*addr_var,srdClientPort.toInt());
         }
+        /////
+//        if (b1==0)
+//            b1=5;
+        //        qDebug()<<b1;
+
+
+
     }
+    //    b1=3;
+    QByteArray ar;
+    ar.push_back(b1);
+    //    qDebug()<<b1;
+    srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
+    srdSocket->writeDatagram(ar,QHostAddress("192.168.1.3"),49123);
+//    srdSocket->writeDatagram(ar,*addr_var,remoteClientPort.toInt());
 
 }
 
 void myUDP::processPendingDatagrams()
 {
-    //    qDebug()<<"yes";
+    //    qDebug()<<"yes";ddd
     static int ptr=0;
     static uint8_t key=255;
     static int S=4;
@@ -118,7 +140,22 @@ void myUDP::processPendingDatagrams()
         for(int i=0;i<datagram.size();i++)
         {
             readVar=datagram[i];
-            controlFromUDP( ip2,readVar,1);
+            controlFromUDP( ip,readVar,1);
+            //            *byteptr=readVar;
+            QByteArray ar;
+            ar.push_back(readVar);
+            //            if(srdSocket!=NULL)
+            //                srdSocket->write(byteptr);
+            //            if(proxy_checked)
+            {
+                //                srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
+                //                simSocket->writeDatagram(ar,*addr_var,remoteClientPort.toInt());
+//                if(readVar==5)
+//                {
+//                srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
+//                srdSocket->writeDatagram(ar,QHostAddress("192.168.1.3"),49123);
+//                }
+            }
             //            qDebug()<<datagram.size();
         }
 
