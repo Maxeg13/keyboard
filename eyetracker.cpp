@@ -215,6 +215,7 @@ void core_func()
     error = tobii_gaze_point_subscribe( device,
                                         []( tobii_gaze_point_t const* gaze_point, void* x1 )
     {
+
             float y1,y2;
             float *f1;
             float ff=3;

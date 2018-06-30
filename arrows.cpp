@@ -15,12 +15,17 @@ QColor band1_clr, band2_clr[4];
 int width_ar=100;
 int thick=width_ar*0.5;
 int height_ar=190;
+QLinearGradient gradient1;
+QBrush brush;
+QPainterPath path;
 
 Arrows::Arrows(QWidget *parent) : QWidget(parent)
 {
     setStyleSheet("background:transparent;");
     setAttribute(Qt::WA_TranslucentBackground);
     setWindowFlags(Qt::FramelessWindowHint);
+
+
     band1_clr=QColor(100,255,100);
 //    band2_clr=QColor(255,255,255);
     pgn_o.resize(0);
@@ -59,7 +64,7 @@ Arrows::Arrows(QWidget *parent) : QWidget(parent)
 
 void Arrows::paintEvent(QPaintEvent *e)
 {
-    QBrush brush;
+
     cc++;
     int width=this->geometry().width();
     int height=this->geometry().height();
@@ -99,22 +104,38 @@ void Arrows::paintEvent(QPaintEvent *e)
     for(int i=0;i<4;i++)
     {
 
+
         QPainterPath path;
+//        path.swap();
+//        path.swap();
         path.addPolygon(pgn[i]);
-        int h=85*shift_c[i]+170;
-        band2_clr[i]=QColor(h,h,h);
-        QLinearGradient gradient1;
+        int h=155*shift_c[i]+100;
+        band2_clr[i]=QColor(h,h,h,h);
+
         int grad_space=350;
+        gradient1=QLinearGradient();
         switch(i)
         {
         case 0:
-             gradient1=QLinearGradient(0,height/2,grad_space,height/2);break;
+//             gradient1=QLinearGradient(0,height/2,grad_space,height/2);
+             gradient1.setStart(0,height/2);
+             gradient1.setFinalStop(grad_space,height/2);
+
+            break;
         case 1:
-             gradient1=QLinearGradient(width,height/2,width-grad_space,height/2);break;
+//             gradient1=QLinearGradient(width,height/2,width-grad_space,height/2);
+             gradient1.setStart(width,height/2);
+             gradient1.setFinalStop(width-grad_space,height/2);
+            break;
         case 2:
-            gradient1=QLinearGradient(width/2,0,width/2,grad_space);break;
+//            gradient1=QLinearGradient(width/2,0,width/2,grad_space);
+            gradient1.setStart(width/2,0);
+            gradient1.setFinalStop(width/2,grad_space);
+            break;
         case 3:
-            gradient1=QLinearGradient(width/2,height,width/2,height-grad_space);
+//            gradient1=QLinearGradient(width/2,height,width/2,height-grad_space);
+            gradient1.setStart(width/2,height);
+            gradient1.setFinalStop(width/2,height-grad_space);
         }
 
 
@@ -131,11 +152,14 @@ void Arrows::paintEvent(QPaintEvent *e)
 
         //        brush.setColor(gradient1);
         painter->setBrush(gradient1);
+        QPen pen(QColor(0,0,0,h));
+        pen.setWidth(4);
+        painter->setPen(pen);
         painter->drawPolygon(pgn[i]);
         //        painter->fillPath(path,QBrush(QColor(h,h,h)));
     }
     //    painter->drawPolygon(pgn[0]);
-    painter->setPen(QPen(QColor(0,0,255)));
+//    painter->setPen(QPen(QColor(0,0,255)));
     //    painter->drawLine(QPoint(0,0),QPoint(20,cc));
 
     delete painter;

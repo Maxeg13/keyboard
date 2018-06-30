@@ -1,4 +1,5 @@
 #include "control_rules.h"
+#include <QThread>
 float margin_x=0.04;
 float margin_y=0.17;
 extern bool emulate_on;
@@ -15,7 +16,7 @@ int UDP_cnt[5];
 //int gl_cnt=0;
 int quantiz=16;
 extern Arrows* ars;
-
+int forw_cnt=0;
 
 int thresh(int x)
 {
@@ -25,17 +26,48 @@ int thresh(int x)
         return quantiz;
 }
 
-void littleControl(INPUT& ip, int b, int r)
+void littleControl(INPUT& ip, int b, int r,int f)
 {
-//    Sleep(1100);
+    //    Sleep(1100);
     key_map(ip,b);
 
-//    ip.ki.dwFlags =0;
-//    qDebug()<<b;
-//    qDebug()<<ip.ki.dwFlags;
-//    qDebug()<<"\n";
+    //    ip.ki.dwFlags =0;
+    //    qDebug()<<b;
+    //    qDebug()<<ip.ki.dwFlags;
+    //    qDebug()<<"\n";
 
-//    SendInput(1, &ip, sizeof(INPUT));
+    //    SendInput(1, &ip, sizeof(INPUT));
+
+    if(r)
+    {
+
+        ip.ki.dwFlags =0;
+        pressed[b]=1;
+    }
+    else
+    {
+        ip.ki.dwFlags=KEYEVENTF_KEYUP;
+//        pressed[b]=0;
+    }
+    if(emulate_on)
+    {
+        //Sleep(1000);
+        SendInput(1, &ip, sizeof(INPUT));
+    }
+    ars->checked[b]=pressed[b];
+}
+
+void littleControl(INPUT& ip, int b, int r)
+{
+    //    Sleep(1100);
+    key_map(ip,b);
+
+    //    ip.ki.dwFlags =0;
+    //    qDebug()<<b;
+    //    qDebug()<<ip.ki.dwFlags;
+    //    qDebug()<<"\n";
+
+    //    SendInput(1, &ip, sizeof(INPUT));
 
     if(r)
     {
@@ -50,7 +82,7 @@ void littleControl(INPUT& ip, int b, int r)
     }
     if(emulate_on)
     {
-//Sleep(1000);
+        //Sleep(1000);
         SendInput(1, &ip, sizeof(INPUT));
     }
     ars->checked[b]=pressed[b];
@@ -72,7 +104,7 @@ void key_map(INPUT& ip, int b)
             ip.ki.wVk = 0x57;//w
             break;
         case 3:
-            ip.ki.wVk = 0x53;//s
+            ip.ki.wVk = VK_SPACE;//s=0x53
             break;
         case 4:
             ip.ki.wVk = VK_SPACE;
@@ -195,7 +227,9 @@ void simple_tracker_rule(float x, float y, INPUT& ip, int b)
 
 void controlFromUDP(INPUT& ip,int b1,int sended)
 {
-
+    forw_cnt++;
+    if(forw_cnt==5)
+        forw_cnt=0;
     int time_steps=30;
     int b;
     switch(b1)
@@ -227,9 +261,24 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
                     littleControl(ip,i,0);
                 }
             }
-            littleControl(ip,b,1);
+
+
+            if(b==2)
+            {
+                if(forw_cnt==0)
+                    littleControl(ip,b,1);
+                if(forw_cnt==2)
+                    littleControl(ip,b,0,0);
+
+//                QThread::msleep(100);
+            }
+            else
+            {
+                littleControl(ip,b,1);
+            }
+
         }
-        if(b==6)
+        if(b==3)
         {
             for(int i=0;i<4;i++)
             {
