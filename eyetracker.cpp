@@ -145,21 +145,21 @@ void core_func()
     // Create atomic used for inter thread communication
     std::atomic<bool> exit_thread( false );
     // Start the background processing thread before subscribing to data
-    thread1=new std::thread(
-                [x1]()
-    {
-//        ip.type = INPUT_KEYBOARD;
-//        ip.ki.wScan = 0; // hardware scan code for key
-//        ip.ki.time = 0;
-//        ip.ki.dwExtraInfo = 0;
-//        Sleep(00);a
-        while(1)
-        {
+//    thread1=new std::thread(
+//                [x1]()
+//    {
+////        ip.type = INPUT_KEYBOARD;
+////        ip.ki.wScan = 0; // hardware scan code for key
+////        ip.ki.time = 0;
+////        ip.ki.dwExtraInfo = 0;
+////        Sleep(00);a
+//        while(1)
+//        {
 
-            controlFromTracker(*x1, *(x1+1),ip);
-        }
-    }
-    );
+//            controlFromTracker(*x1, *(x1+1),ip);
+//        }
+//    }
+//    );
 
     std::thread thread(
                 [&exit_thread, device]()
@@ -252,6 +252,7 @@ void core_func()
     {
         // Normally, main thread would do things here - simulate this with a sleep
         std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+        controlFromTracker(*x1, *(x1+1),ip);
     }
 
     // Cleanup subscriptions and resources

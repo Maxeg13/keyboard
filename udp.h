@@ -21,6 +21,7 @@ public:
     QString readPort;
     QString srdClientPort;
     QString remoteClientPort;
+    QString remoteAddr;
     myUDP(QWidget *parent = 0);
     QTimer* timer;
    public  slots:

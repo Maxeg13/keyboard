@@ -210,6 +210,13 @@ void simple_tracker_rule(float x, float y, INPUT& ip, int b)
         {
             pressed[b]=1;
             state[b]=quantiz;
+            if(b==3)
+            {
+                pressed[0]=0;
+                pressed[1]=0;
+                pressed[2]=0;
+                ars->checked[b]=pressed[b];
+            }
         }
         else
         {

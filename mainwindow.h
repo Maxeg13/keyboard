@@ -17,7 +17,7 @@ public:
     QPushButton *emulate_b1, *emulate_b2;
 //    void keyPressEvent(QKeyEvent *event);
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+//    ~MainWindow();
     QSlider* sr_y_c;
 
 public slots:
@@ -26,7 +26,7 @@ public slots:
     void refr();
     void emitAddr();
 
-    void closeEvent(QCloseEvent *);
+//    void closeEvent(QCloseEvent *);
     void emulateChange1();
 //    void emulation();
 private:

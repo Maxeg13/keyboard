@@ -81,9 +81,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     this->setMinimumWidth(350);
-    udp=new myUDP();
+    udp=new myUDP(this);
 
-    UDP_label->setText(QString("\nreceive port: ")+udp->readPort+QString("\nlocal client port: ")+udp->srdClientPort+
+    UDP_label->setText(QString("remote address: ")+udp->remoteAddr+QString("\nreceive port: ")+udp->readPort+QString("\nlocal client port: ")+udp->srdClientPort+
             QString("\nremote client port: ")+udp->remoteClientPort);
 //    udp->setAddr(LE_addr->text());
 
@@ -159,13 +159,13 @@ void MainWindow::emulateChange1()
 //    //    control();
 //}
 
-void MainWindow::closeEvent(QCloseEvent *)
+void MainWindow::closeEvent(QCloseEvent *e)
 {
     emit close_sgn();
 }
 
-MainWindow::~MainWindow()
-{
+//MainWindow::~MainWindow()
+//{
 
-}
+//}
 
