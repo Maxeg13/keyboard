@@ -122,9 +122,10 @@ void core_func()
     if( devices.size() == 0 )
     {
         std::cerr << "No stream engine compatible device(s) found." << std::endl;
-        QMessageBox* msg=new QMessageBox();
-        msg->setText("No stream engine compatible device(s) found");
-        msg->exec();
+//        QMessageBox* msg=new QMessageBox();
+//        msg->setText("No stream engine compatible device(s) found");
+//        msg->exec();
+//        std::this_thread::sleep_for( std::chrono::milliseconds( 1500 ) );
         //        error_TE->setText("No stream engine compatible device(s) found.\n");
         tobii_api_destroy( api );
         //        return 1;

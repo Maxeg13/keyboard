@@ -26,14 +26,17 @@ public:
     QTimer* timer;
    public  slots:
     void processPendingDatagrams();
+    void processPendingDatagrams2();
     void setAddr(QString);
     void control();
+    void localOrHost(bool);
+
 
 private:
-
+    QUdpSocket *socketForGetting, *socketForGettingAny, *srdSocket, *simSocket;
     QLabel *statusLabel;
     QPushButton *quitButton;
-    QUdpSocket *socketForGetting, *srdSocket, *simSocket;
+
     signals:
     void sig_out(vector<uint8_t>);
 

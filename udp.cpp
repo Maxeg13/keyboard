@@ -29,7 +29,7 @@ myUDP::myUDP(QWidget *parent)
     {
         QTextStream in(&inputFile);
         in.readLine();
-        addr_var=new QHostAddress(in.readLine()); /*remoteAddr=addr_var->toString();*/
+        addr_var=new QHostAddress(remoteAddr=in.readLine()); /*remoteAddr=addr_var->toString();*/
         //        remoteAddr=in.readLine();
         in.readLine();
         readPort=in.readLine();
@@ -45,27 +45,31 @@ myUDP::myUDP(QWidget *parent)
         readPort=QString(3333);
         remoteClientPort=QString(4444);
     }
-
+    socketForGettingAny = new QUdpSocket(this);
     socketForGetting = new QUdpSocket(this);
+
+
 
     //    quitButton = new QPushButton(tr("&Quit"));
     srdSocket= new QUdpSocket(this);
-    simSocket= new QUdpSocket(this);
+    //    simSocket= new QUdpSocket(this);
     //    srdSocket->connectToHost(*hostAddr,49123,QIODevice::WriteOnly);
 
 
     timer=new QTimer();
-    timer->setInterval(20);
+    timer->setInterval(14);
     timer->start();
 
     connect(timer,SIGNAL(timeout()),this,SLOT(control()));
     //! [1]
 
     //    socketForGetting->bind(*addr_var,(quint16)(readPort.toInt()));
-    //    socketForGetting->bind(QHostAddress::LocalHost,(quint16)(readPort.toInt()));
-    socketForGetting->bind(QHostAddress::Any,(quint16)(readPort.toInt()));
+    socketForGetting->bind(QHostAddress::LocalHost,(quint16)(readPort.toInt()));
+    socketForGettingAny->bind(QHostAddress::AnyIPv4,(quint16)(readPort.toInt()));
     connect(socketForGetting, SIGNAL(readyRead()),
             this, SLOT(processPendingDatagrams()));
+    connect(socketForGettingAny, SIGNAL(readyRead()),
+            this, SLOT(processPendingDatagrams2()));
 }
 
 void myUDP::setAddr(QString s)
@@ -81,10 +85,10 @@ void myUDP::control()
     //    SendInput(1, &ip, sizeof(INPUT));
 
     //    if(proxy_checked)
-    //        for (int b1=1;b1<6;b1++)
-    //        {
-    //            controlFromUDP( ip2,b1,0);
-    //        }
+    //            for (int b1=1;b1<5;b1++)
+    //            {
+    //                controlFromUDP( ip,b1,0);
+    //            }
     //    *byteptr=2;
     //    QByteArray ar;
     //    ar.push_back(2);
@@ -93,23 +97,25 @@ void myUDP::control()
     //        srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
     uint8_t b1=0;
     int noth=0;
+    static int cnt1;
+
     for(int b=0;b<4;b++)
     {
         if(ars->checked[b])
         {
             switch(b)
             {
-            case 2:b1=1;
-                //                controlFromUDP(ip, b1, 0);
-                break;
+            case 2:b1=1;break;
             case 1:b1=4;break;
             case 0:b1=3;break;
             case 3:b1=2;break;
             }
-
         }
+    }
 
-        /////
+
+//    for(int b=0;b<4;b++)
+    {/////
         //        if (b1==0)
         //            b1=5;
         //        qDebug()<<b1;
@@ -121,6 +127,7 @@ void myUDP::control()
             srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
             //            srdSocket->writeDatagram(ar,QHostAddress("192.168.1.3"),49123);
             srdSocket->writeDatagram(ar,*addr_var,remoteClientPort.toInt());
+
         }
         else
         {
@@ -136,6 +143,20 @@ void myUDP::control()
 
     }
 
+}
+
+void myUDP::localOrHost(bool b)
+{
+    //    disconnect(socketForGetting, SIGNAL(readyRead()),
+    //            0, 0);
+    //    delete socketForGetting;
+    //    socketForGetting=new QUdpSocket(this);
+    //    if(b)
+    //        socketForGetting->bind(QHostAddress::LocalHost,(quint16)(readPort.toInt()));
+    //    else
+    //        socketForGetting->bind(QHostAddress::Broadcast,(quint16)(readPort.toInt()));
+    //    connect(socketForGetting, SIGNAL(readyRead()),
+    //            this, SLOT(processPendingDatagrams()));
 }
 
 void myUDP::processPendingDatagrams()
@@ -160,48 +181,40 @@ void myUDP::processPendingDatagrams()
             //            *byteptr=readVar;
             QByteArray ar;
             ar.push_back(readVar);
-            //            if(srdSocket!=NULL)
-            //                srdSocket->write(byteptr);
-            //            if(proxy_checked)
-            {
-                //                srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
-                //                simSocket->writeDatagram(ar,*addr_var,remoteClientPort.toInt());
-                //                if(readVar==5)
-                //                {
-                //                    srdSocket->writeDatagram(ar,QHostAddress::LocalHost,srdClientPort.toInt());
-                //                    srdSocket->writeDatagram(ar,QHostAddress("192.168.1.3"),49123);
-                //                }
-            }
-            //            qDebug()<<datagram.size();
+
         }
+    }
 
 
 
-        //        for(int i=0;i<datagram.size();i++)
-        //        {
-        //            readVar=datagram[i];
-        //            qDebug()<<datagram.size();
+}
+
+void myUDP::processPendingDatagrams2()
+{
+    //    qDebug()<<"yes";ddd
+    static int ptr=0;
+    static uint8_t key=255;
+    static int S=4;
+    static vector<byte> data;
 
 
-        //            if(ptr==(S-1))
-        //            {
-        //                if(readVar==key)
-        //                {
-        //                    //                                qDebug()<<(uint8_t)readVar<<" ptr="<<(int8_t)ptr<<"\n";
-        ////                    qDebug()<<data.size();
-        //                    emit sig_out(data);
-        //                    data.resize(0);
-        //                    ptr=0;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                //                            qDebug()<<(uint8_t)readVar<<" ptr="<<(int8_t)ptr<<"\n";
-        //                data.push_back(readVar);
-        //                ptr++;
-        //            }
-        //        }
+    while (socketForGettingAny->hasPendingDatagrams()) {
+        QByteArray datagram;
+        datagram.resize(socketForGettingAny->pendingDatagramSize());
+        socketForGettingAny->readDatagram(datagram.data(), datagram.size());
+        //        statusLabel->setText(tr("Received datagram: \"%1\"")
+        //                             .arg(datagram.data()));
 
+
+        for(int i=0;i<datagram.size();i++)
+        {
+            readVar=datagram[i];
+            controlFromUDP( ip,readVar,1);
+            //            *byteptr=readVar;
+            QByteArray ar;
+            ar.push_back(readVar);
+
+        }
     }
 
 }

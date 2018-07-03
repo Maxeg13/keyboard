@@ -26,7 +26,7 @@ int thresh(int x)
         return quantiz;
 }
 
-void littleControl(INPUT& ip, int b, int r,int f)
+void littleControlPWM(INPUT& ip, int b, int r)
 {
     //    Sleep(1100);
     key_map(ip,b);
@@ -47,7 +47,7 @@ void littleControl(INPUT& ip, int b, int r,int f)
     else
     {
         ip.ki.dwFlags=KEYEVENTF_KEYUP;
-//        pressed[b]=0;
+        pressed[b]=1.;
     }
     if(emulate_on)
     {
@@ -204,18 +204,26 @@ void simple_tracker_rule(float x, float y, INPUT& ip, int b)
                              ars->centre[b]-QPoint(x*ars->width(),y*ars->height()));
     //    if(b==0)
     //        qDebug()<<h;
-    int dist=120;
+    int dist=116;
     if((((b==0)||(b==1))&&lr_checked)||(((b==2)||(b==3))&&downup_checked))
         if(h<dist*dist)
         {
             pressed[b]=1;
             state[b]=quantiz;
-            if(b==3)
+            //            if(b==3)
+            //            {aa
+            //                pressed[0]=0;
+            //                pressed[1]=0;
+            //                pressed[2]=0;
+            //                ars->checked[b]=pressed[b];
+            //            }
+            for(int i=0;i<4;i++)
             {
-                pressed[0]=0;
-                pressed[1]=0;
-                pressed[2]=0;
-                ars->checked[b]=pressed[b];
+                if(i!=b)
+                {
+                    pressed[i]=0;
+                    ars->checked[i]=pressed[i];
+                }
             }
         }
         else
@@ -250,7 +258,7 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
     case 4://
         b=1;break;//
     case 5:
-        b=6;
+        b=5;
     }
 
     //    if(b!=6)
@@ -268,30 +276,32 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
                     littleControl(ip,i,0);
                 }
             }
-
-
             if(b==2)
             {
                 if(forw_cnt==0)
                     littleControl(ip,b,1);
-                if(forw_cnt==2)
-                    littleControl(ip,b,0,0);
+                if(forw_cnt==3)
+                    littleControlPWM(ip,b,0);
 
-//                QThread::msleep(100);
+                //                QThread::msleep(100);
             }
             else
-            {
                 littleControl(ip,b,1);
-            }
-
         }
-        if(b==3)
+        if(b==5)
         {
-            for(int i=0;i<4;i++)
+            //            if(((b==0)||(b==1))&&!lr_checked)
             {
-                littleControl(ip,i,0);
+                littleControl(ip,0,0);
+                littleControl(ip,1,0);
+            }
+            //            if(((b==2)||(b==3))&&!downup_checked)
+            {
+                littleControl(ip,2,0);
+                littleControl(ip,3,0);
             }
         }
+
 
         //        UDP_cnt[b]=0;
     }
@@ -360,11 +370,13 @@ void controlFromTracker(float x, float y, INPUT& ip)
                     }
 
                 if((((b==0)||(b==1))&&lr_checked)||(((b==2)||(b==3))&&downup_checked))
-                    if(!pressed[b])
-                    {
-                        ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
-                        SendInput(1, &ip, sizeof(INPUT));
-                    }
+                    for (int i=0;i<4;i++)
+                        if(!pressed[i])
+                        {
+                            key_map(ip,i);
+                            ip.ki.dwFlags =KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+                            SendInput(1, &ip, sizeof(INPUT));
+                        }
             }
             Sleep(4);
         }

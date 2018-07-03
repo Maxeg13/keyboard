@@ -26,7 +26,7 @@ public slots:
     void refr();
     void emitAddr();
 
-//    void closeEvent(QCloseEvent *);
+    void closeEvent(QCloseEvent *);
     void emulateChange1();
 //    void emulation();
 private:

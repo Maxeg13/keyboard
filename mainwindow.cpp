@@ -8,6 +8,7 @@
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
+#include <QUdpSocket>
 #include <QFile>
 int cnt;
 float y_centre=.6;
@@ -23,13 +24,15 @@ QLabel* UDP_label;
 MyThread* thread_main;
 QGroupBox* tracker_box;
 QGroupBox* UDP_box;
-QCheckBox *downup_check, *lr_check, *kb_layout_check, *proxy_check;
-QGridLayout lyt1;
-QGridLayout lyt2;
+QCheckBox *downup_check, *lr_check, *kb_layout_check, *arrows_check;
+QCheckBox *local_h_check, *remote_h_check;
 QTimer* timer_emul;
 QLineEdit* LE_addr;
+QGridLayout lyt1;
+QGridLayout lyt2;
+
 QString sendHost;
-bool proxy_checked=1;
+bool arrows_checked=1;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
@@ -46,9 +49,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget *centralWidget1=new QWidget();
     centralWidget1->setLayout(GL);
 
-    proxy_check=new QCheckBox("is proxy:");
-    proxy_check->setChecked(true);
-    proxy_check->setDisabled(true);
+    local_h_check=new QCheckBox("read from local host");
+    local_h_check->setChecked(false);
+
+    remote_h_check=new QCheckBox("read from remote host");
+    remote_h_check->setChecked(false);
+
+    arrows_check=new QCheckBox("draw arrows");
+    arrows_check->setChecked(true);
+    //    arrows_check->setDisabled(true);
     kb_layout_check=new QCheckBox("wasd keyboard layout");
     kb_layout_check->setChecked(1);
     downup_check=new QCheckBox("upward-back");
@@ -68,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     GL->addWidget(start_b,1,0);
     GL->addWidget(emulate_b1,1,1);
     GL->addWidget(kb_layout_check,2,0);
-    GL->addWidget(proxy_check,2,1);
+    GL->addWidget(arrows_check,2,1);
 
     tracker_box->setLayout(&lyt1);
     lyt1.addWidget(sr_y_c,0,0,3,1);
@@ -78,14 +87,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     UDP_box->setLayout((&lyt2));
     lyt2.addWidget(UDP_label,0,0);
+    //    lyt2.addWidget(local_h_check,1,0);
 
 
     this->setMinimumWidth(350);
     udp=new myUDP(this);
 
     UDP_label->setText(QString("remote address: ")+udp->remoteAddr+QString("\nreceive port: ")+udp->readPort+QString("\nlocal client port: ")+udp->srdClientPort+
-            QString("\nremote client port: ")+udp->remoteClientPort);
-//    udp->setAddr(LE_addr->text());
+                       QString("\nremote client port: ")+udp->remoteClientPort);
+    //    udp->setAddr(LE_addr->text());
 
     setCentralWidget(centralWidget1);
     connect(lr_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
@@ -93,23 +103,24 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(start_b,SIGNAL(released()),this,SLOT(start_released()));
     connect(sr_y_c,SIGNAL(valueChanged(int)),this,SLOT(refr()));
     connect(emulate_b1,SIGNAL(released()),this,SLOT(emulateChange1()));
-//    connect(proxy_check,SIGNAL(stateChanged(int)),)
-    //    connect(emulate_b2,SIGNAL(released()),this,SLOT(emulateChange1()));
-//    connect(LE_addr,SIGNAL(returnPressed()),this,SLOT(emitAddr()));
+    connect(arrows_check,SIGNAL(stateChanged(int)),this, SLOT(checkChanged()));
+    connect(arrows_check,SIGNAL(stateChanged(int)),this, SLOT(checkChanged()));
     connect(this,SIGNAL(addr_sgn(QString)),udp,SLOT(setAddr(QString)));
     connect(kb_layout_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
-    //    connect(udp,SIGNAL(sig_out(vector<uint8_t>)),this,SLOT(getEMG(vector<uint8_t>)));
-    //    connect(timer_emul,SIGNAL(timeout()),this,SLOT(emulation()));
-    //    emit addr_sgn(LE_addr->text());
+
 }
 
 void MainWindow::checkChanged()
 {
     lr_checked=lr_check->isChecked();
     downup_checked=downup_check->isChecked();
-    proxy_checked=proxy_check->isChecked();
+    arrows_checked=arrows_check->isChecked();
     kb_layout_checked=kb_layout_check->isChecked();
-    qDebug()<<kb_layout_checked;
+    //    udp->localOrHost(local_h_check->isChecked());
+
+
+
+    //    qDebug()<<kb_layout_checked;
 }
 
 void MainWindow::emitAddr()
@@ -161,6 +172,17 @@ void MainWindow::emulateChange1()
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
+    qDebug()<<"bye!";
+    disconnect(lr_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
+    disconnect(downup_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
+    disconnect(start_b,SIGNAL(released()),this,SLOT(start_released()));
+    disconnect(sr_y_c,SIGNAL(valueChanged(int)),this,SLOT(refr()));
+    disconnect(emulate_b1,SIGNAL(released()),this,SLOT(emulateChange1()));
+    disconnect(arrows_check,SIGNAL(stateChanged(int)),this, SLOT(checkChanged()));
+    disconnect(arrows_check,SIGNAL(stateChanged(int)),this, SLOT(checkChanged()));
+    disconnect(this,SIGNAL(addr_sgn(QString)),0,0);
+    disconnect(kb_layout_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
+    delete thread_main;
     emit close_sgn();
 }
 
