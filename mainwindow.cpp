@@ -17,6 +17,7 @@ bool emulate_on;
 bool lr_checked=1;
 bool kb_layout_checked=1;
 bool downup_checked=1;
+int PWM_bound=7;
 
 //extern QTextEdit* error_TE;
 
@@ -46,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     emulate_b1=new QPushButton(tr("emu&late off"));
 
     QGridLayout* GL=new QGridLayout();
-    QWidget *centralWidget1=new QWidget();
+    QWidget *centralWidget1=new QWidget(this);
     centralWidget1->setLayout(GL);
 
     local_h_check=new QCheckBox("read from local host");
@@ -65,7 +66,13 @@ MainWindow::MainWindow(QWidget *parent) :
     lr_check=new QCheckBox("left-right");
     lr_check->setChecked(true);
 
-    sr_y_c=new QSlider();
+    sr_PWM=new QSlider(this);
+    sr_PWM->setRange(0,10);
+    sr_PWM->setValue(8);
+    sr_PWM->setOrientation(Qt::Horizontal);
+
+
+    sr_y_c=new QSlider(this);
     //    sr_x_c->setGeometry(Qudpt(0,0,200,50));
     sr_y_c->setOrientation(Qt::Vertical);
     //    sr_y_c->set
@@ -86,15 +93,15 @@ MainWindow::MainWindow(QWidget *parent) :
     //    lyt1.addWidget(emulate_b1,2,1);
 
     UDP_box->setLayout((&lyt2));
-    lyt2.addWidget(UDP_label,0,0);
-    //    lyt2.addWidget(local_h_check,1,0);
+    lyt2.addWidget(UDP_label,0,0);    
+    lyt2.addWidget(sr_PWM,1,0);
 
 
     this->setMinimumWidth(350);
     udp=new myUDP(this);
 
     UDP_label->setText(QString("remote address: ")+udp->remoteAddr+QString("\nreceive port: ")+udp->readPort+QString("\nlocal client port: ")+udp->srdClientPort+
-                       QString("\nremote client port: ")+udp->remoteClientPort);
+                       QString("\nremote client port: ")+udp->remoteClientPort+QString("\n\n     PWM value:"));
     //    udp->setAddr(LE_addr->text());
 
     setCentralWidget(centralWidget1);
@@ -107,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(arrows_check,SIGNAL(stateChanged(int)),this, SLOT(checkChanged()));
     connect(this,SIGNAL(addr_sgn(QString)),udp,SLOT(setAddr(QString)));
     connect(kb_layout_check,SIGNAL(stateChanged(int)),this,SLOT(checkChanged()));
-
+    connect(sr_PWM,SIGNAL(valueChanged(int)),this,SLOT(PWM_changed()));
 }
 
 void MainWindow::checkChanged()
@@ -126,6 +133,11 @@ void MainWindow::checkChanged()
 void MainWindow::emitAddr()
 {
     emit addr_sgn(LE_addr->text());
+}
+
+void MainWindow::PWM_changed()
+{
+    PWM_bound=sr_PWM->value();
 }
 
 void MainWindow::start_released()

@@ -8,15 +8,17 @@ extern float x_centre;
 extern bool lr_checked;
 extern bool downup_checked;
 extern bool kb_layout_checked;
+extern int PWM_bound;
 
 int state[4]={0,0,0,0};
 bool pressed[4]={0,0,0,0};
 float sens_div=0.016;
-int UDP_cnt[5];
+int UDP_cnt[5]={0,0,0,0,0};
 //int gl_cnt=0;
 int quantiz=16;
 extern Arrows* ars;
 int forw_cnt=0;
+//int cnt
 
 int thresh(int x)
 {
@@ -41,19 +43,37 @@ void littleControlPWM(INPUT& ip, int b, int r)
     if(r)
     {
 
-        ip.ki.dwFlags =0;
         pressed[b]=1;
+        if(emulate_on)
+        {
+            UDP_cnt[b]++;
+            if(UDP_cnt[b]==10)
+                UDP_cnt[b]=0;
+
+            if(UDP_cnt[b]==0)
+            {
+                ip.ki.dwFlags=0;
+                SendInput(1, &ip, sizeof(INPUT));
+            }
+            else if(UDP_cnt[b]>PWM_bound)
+            {
+                ip.ki.dwFlags=KEYEVENTF_KEYUP;
+                SendInput(1, &ip, sizeof(INPUT));
+            }
+
+        }
     }
     else
     {
         ip.ki.dwFlags=KEYEVENTF_KEYUP;
-        pressed[b]=1.;
+        pressed[b]=0;
+        if(emulate_on)
+        {
+            //Sleep(1000);
+            SendInput(1, &ip, sizeof(INPUT));
+        }
     }
-    if(emulate_on)
-    {
-        //Sleep(1000);
-        SendInput(1, &ip, sizeof(INPUT));
-    }
+
     ars->checked[b]=pressed[b];
 }
 
@@ -123,7 +143,7 @@ void key_map(INPUT& ip, int b)
             ip.ki.wVk = VK_UP;//w
             break;
         case 3:
-            ip.ki.wVk = VK_DOWN;//s
+            ip.ki.wVk = VK_SPACE;//s
             break;
         case 4:
             ip.ki.wVk = VK_SPACE;
@@ -140,7 +160,6 @@ void rule(float x, float y, INPUT& ip, int b)
         //LEFT
         if(x<x_centre-margin_x/2)
         {
-
             pressed[b]=1;
             state[b]=thresh((0.5-margin_x/2-x)/sens_div);
         }
@@ -276,15 +295,8 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
                     littleControl(ip,i,0);
                 }
             }
-            if(b==2)
-            {
-                if(forw_cnt==0)
-                    littleControl(ip,b,1);
-                if(forw_cnt==3)
-                    littleControlPWM(ip,b,0);
-
-                //                QThread::msleep(100);
-            }
+            if((b==0)||(b==1))
+                littleControlPWM(ip,b,1);
             else
                 littleControl(ip,b,1);
         }

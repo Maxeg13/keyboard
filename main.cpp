@@ -14,8 +14,6 @@ int main(int argc, char *argv[])
     ars=new Arrows();
 
     MainWindow w;
-
-
     w.show();
        ars->showFullScreen();
     QObject::connect(&w,SIGNAL(close_sgn()),&a,SLOT(closeAllWindows()));

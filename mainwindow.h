@@ -19,12 +19,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
 //    ~MainWindow();
     QSlider* sr_y_c;
+    QSlider* sr_PWM;
 
 public slots:
     void checkChanged();
     void start_released();
     void refr();
     void emitAddr();
+    void PWM_changed();
 
     void closeEvent(QCloseEvent *);
     void emulateChange1();
