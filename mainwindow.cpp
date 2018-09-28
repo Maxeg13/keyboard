@@ -18,6 +18,8 @@ bool lr_checked=1;
 bool kb_layout_checked=1;
 bool downup_checked=1;
 int PWM_bound=7;//will be changed below
+int PWM_accum=0;
+float PWM_accum_fl=0;
 
 //extern QTextEdit* error_TE;
 

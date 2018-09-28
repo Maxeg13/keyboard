@@ -9,6 +9,7 @@ extern bool lr_checked;
 extern bool downup_checked;
 extern bool kb_layout_checked;
 extern int PWM_bound;
+extern float PWM_accum_fl;
 
 int state[4]={0,0,0,0};
 bool pressed[4]={0,0,0,0};
@@ -28,56 +29,56 @@ int thresh(int x)
         return quantiz;
 }
 
-void littleControlPWM(INPUT& ip, int b, int r)
+void littleControlPWM(INPUT& ip)
 {
     //    Sleep(1100);
-    key_map(ip,b);
+    int b;
 
-    //    ip.ki.dwFlags =0;
-    //    qDebug()<<b;
-    //    qDebug()<<ip.ki.dwFlags;
-    //    qDebug()<<"\n";
-
-    //    SendInput(1, &ip, sizeof(INPUT));
-
-    if(r)
+    if(emulate_on)
     {
-
-        pressed[b]=1;
-        if(emulate_on)
+        if(PWM_accum_fl<0)
         {
-            UDP_cnt[b]++;
-            if(UDP_cnt[b]==10)
-                UDP_cnt[b]=0;
-
-            if(UDP_cnt[b]==0)
-            {
-                ip.ki.dwFlags=0;
-                SendInput(1, &ip, sizeof(INPUT));
-            }
-            else if(UDP_cnt[b]>PWM_bound)
-            {
-                ip.ki.dwFlags=KEYEVENTF_KEYUP;
-                SendInput(1, &ip, sizeof(INPUT));
-            }
-
+            b=0;
+            key_map(ip,1);
+            ip.ki.dwFlags=KEYEVENTF_KEYUP;
+            SendInput(1, &ip, sizeof(INPUT));
+            key_map(ip,0);
         }
-    }
-    else
-    {
-        ip.ki.dwFlags=KEYEVENTF_KEYUP;
-        pressed[b]=0;
-        if(emulate_on)
+        else
         {
-            //Sleep(1000);
+            b=1;
+            key_map(ip,0);
+            ip.ki.dwFlags=KEYEVENTF_KEYUP;
+            SendInput(1, &ip, sizeof(INPUT));
+            key_map(ip,1);
+        }
+
+
+        //        pressed[b]=1;
+
+        UDP_cnt[b]++;
+        if(UDP_cnt[b]==10)
+            UDP_cnt[b]=0;
+
+        if(UDP_cnt[b]==0)
+        {
+            ip.ki.dwFlags=0;
+
+            SendInput(1, &ip, sizeof(INPUT));
+        }
+        else if(UDP_cnt[b]>fabs(PWM_accum_fl))
+        {
+            ip.ki.dwFlags=KEYEVENTF_KEYUP;
             SendInput(1, &ip, sizeof(INPUT));
         }
     }
 
-    ars->checked[b]=pressed[b];
 }
 
-void littleControl(INPUT& ip, int b, int r)
+
+
+
+void littleControl(INPUT& ip, int b, int s)// s - set
 {
     //    Sleep(1100);
     key_map(ip,b);
@@ -89,9 +90,8 @@ void littleControl(INPUT& ip, int b, int r)
 
     //    SendInput(1, &ip, sizeof(INPUT));
 
-    if(r)
+    if(s)
     {
-
         ip.ki.dwFlags =0;
         pressed[b]=1;
     }
@@ -258,6 +258,23 @@ void simple_tracker_rule(float x, float y, INPUT& ip, int b)
 //{
 //    key_map(ip,b);
 //}
+void lr_pressed(int b,int s)
+{
+    if(s==0)
+        if(b==0)
+            pressed[0]=0;
+        else
+            pressed[1]=0;
+    else
+        if(b==0)
+            pressed[0]=1;
+        else
+            pressed[1]=1;
+    ars->checked[b]=pressed[b];
+
+}
+
+
 
 void controlFromUDP(INPUT& ip,int b1,int sended)
 {
@@ -280,6 +297,9 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
         b=5;
     }
 
+//    qDebug()<<123;
+    littleControlPWM(ip);
+//    littleControlPWM(ip);
     //    if(b!=6)
     if(sended)
     {
@@ -288,15 +308,42 @@ void controlFromUDP(INPUT& ip,int b1,int sended)
 
         if((((b==0)||(b==1))&&!lr_checked)||(((b==2)||(b==3))&&!downup_checked))
         {
-            for(int i=0;i<4;i++)
+
+            for(int i=2;i<4;i++)
             {
                 if(i!=b)
                 {
                     littleControl(ip,i,0);
                 }
             }
+            for(int i=0;i<2;i++)
+            {
+                if(i!=b)
+                {
+                    lr_pressed(i,0);
+                }
+            }
+
+
+            float PWM_incr=0.1;//0.08;
             if((b==0)||(b==1))
-                littleControlPWM(ip,b,1);
+            {
+                qDebug()<<PWM_accum_fl;
+                if(b==0)
+                {
+                    lr_pressed(b,1);
+                    PWM_accum_fl-=PWM_incr;
+                    if(PWM_accum_fl<-8)
+                        PWM_accum_fl=-8;
+                }
+                else
+                {
+                    lr_pressed(b,1);
+                    PWM_accum_fl+=PWM_incr;
+                    if(PWM_accum_fl>8)
+                        PWM_accum_fl=8;
+                }
+            }
             else
                 littleControl(ip,b,1);
         }

@@ -177,7 +177,7 @@ void myUDP::processPendingDatagrams()
         for(int i=0;i<datagram.size();i++)
         {
             readVar=datagram[i];
-            controlFromUDP( ip,readVar,1);
+            controlFromUDP(ip,readVar,1);
             //            *byteptr=readVar;
             QByteArray ar;
             ar.push_back(readVar);
